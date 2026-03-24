@@ -1,0 +1,21 @@
+{
+    "agents": [
+        "junie",
+        "claude_code",
+        "codex"
+    ],
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch_mcp": false,
+    "packages": [
+        "laravel/fortify"
+    ],
+    "sail": false,
+    "skills": [
+        "laravel-best-practices",
+        "wayfinder-development",
+        "inertia-vue-development",
+        "tailwindcss-development",
+        "fortify-development"
+    ]
+}
