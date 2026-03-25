@@ -1,4 +1,65 @@
 <laravel-boost-guidelines>
+=== .ai/core rules ===
+
+# PHPStan / Larastan
+
+- If you have modified any PHP files, you must run `vendor/bin/phpstan analyse` after Pint and fix all reported errors before finalising changes.
+- Configuration is in `phpstan.neon` at the project root. The current level is 5.
+
+=== .ai/custom-guidelines rules ===
+
+# Custom Guidelines
+
+`CLAUDE.md` and `AGENTS.md` are fully managed by Laravel Boost and regenerated on every `php artisan boost:update`. Do not add custom rules directly to those files.
+
+## Adding New Guidelines
+
+Place custom guidelines in `.ai/guidelines/` at the project root. Boost merges these into all agent instruction files on every update.
+
+- Create a subdirectory and a `core.md` file: `.ai/guidelines/{name}/core.md`
+- The file content will be wrapped automatically in the appropriate `=== {name} ===` section
+- Run `php artisan boost:update` after creating or modifying a guideline to apply it
+
+=== .ai/filament-ui rules ===
+
+# Filament Admin Panel Conventions
+
+## Delete and Edit Actions
+
+These rules apply to all Filament resource views (`List`, `Create`, `Edit`, `View`):
+
+- Do not add delete buttons or edit buttons to `ListResource` (index) or `ViewResource` (show/detail) pages.
+- Always place both the delete action and the edit action inside `EditResource` (edit/update) view only.
+- This keeps destructive and mutating actions one step away from browsing and reduces accidental changes or deletions.
+
+## Post-Create Redirect
+
+- After creating a new record, always redirect to the list page (`index`) by overriding `getRedirectUrl()` in the `CreateRecord` page class:
+
+```php
+protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
+}
+```
+
+=== .ai/dictionary rules ===
+
+# Dictionary Models
+
+- Place all dictionary models in `app/Models/Dictionary/` subfolder (e.g. `app/Models/Dictionary/Country.php`).
+- Place all dictionary seeders in `database/seeders/Dictionary/` subfolder (e.g. `database/seeders/Dictionary/CountrySeeder.php`).
+- Dictionary models represent lookup/reference data (e.g. countries, currencies, statuses).
+
+=== .ai/migrations rules ===
+
+# Laravel Migrations
+
+- Always use Laravel's schema builder syntax (`Schema::create`, `$table->string()`, etc.) for migrations. Only fall back to raw SQL via `DB::statement()` when the required operation is impossible with the schema builder (e.g. advanced index types, partial indexes, custom constraints).
+- Every new table must have a comment describing its purpose: `$table->comment('...')`.
+- Every new column must have a comment describing its purpose: `$table->string('name')->comment('...')`.
+- Every new table must include `$table->timestamps()` to add `created_at` and `updated_at` columns. Never use `$table->timestamp('created_at')` or similar manual alternatives.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -10,11 +71,14 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
 - php - 8.4
+- filament/filament (FILAMENT) - v5
 - inertiajs/inertia-laravel (INERTIA_LARAVEL) - v2
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v13
 - laravel/prompts (PROMPTS) - v0
+- laravel/sanctum (SANCTUM) - v4
 - laravel/wayfinder (WAYFINDER) - v0
+- livewire/livewire (LIVEWIRE) - v4
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pail (PAIL) - v1
@@ -114,6 +178,13 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
+
+=== herd rules ===
+
+# Laravel Herd
+
+- The application is served by Laravel Herd at `https?://[kebab-case-project-dir].test`. Use the `get-absolute-url` tool to generate valid URLs. Never run commands to serve the site. It is always available.
+- Use the `herd` CLI to manage services, PHP versions, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`). Run `herd list` to discover all available commands.
 
 === tests rules ===
 
