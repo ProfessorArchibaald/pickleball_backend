@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Data\Matches\StoreMatchData;
 use App\Models\Dictionary\GameType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,5 +32,10 @@ class StoreMatchRequest extends FormRequest
                 Rule::exists(GameType::class, 'id'),
             ],
         ];
+    }
+
+    public function toData(): StoreMatchData
+    {
+        return StoreMatchData::from($this->safe()->all());
     }
 }

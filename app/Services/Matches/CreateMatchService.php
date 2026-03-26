@@ -2,17 +2,15 @@
 
 namespace App\Services\Matches;
 
+use App\Data\Matches\StoreMatchData;
 use App\Models\GameMatch;
 
 class CreateMatchService
 {
-    /**
-     * @param  array{game_type_id: int}  $attributes
-     */
-    public function create(array $attributes): GameMatch
+    public function create(StoreMatchData $data): GameMatch
     {
         $match = GameMatch::query()->create([
-            'game_type_id' => $attributes['game_type_id'],
+            'game_type_id' => $data->gameTypeId,
         ]);
 
         return $match->load('gameType');

@@ -20,11 +20,11 @@ class GameType extends Model
 
     protected $table = 'game_types';
 
-    public const string DEFAULT_NAME = 'Pickleball game name';
+    public const string DEFAULT_NAME = 'Pickleball';
 
     protected static function booted(): void
     {
-        static::creating(function (): void {
+        static::creating(static function (): void {
             if (static::query()->exists()) {
                 throw ValidationException::withMessages([
                     'game_type' => 'Only one game type can exist.',
@@ -32,7 +32,7 @@ class GameType extends Model
             }
         });
 
-        static::deleting(function (): void {
+        static::deleting(static function (): void {
             throw ValidationException::withMessages([
                 'game_type' => 'Game types cannot be deleted.',
             ]);

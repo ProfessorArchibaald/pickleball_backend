@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Api;
 
+use App\Data\Matches\StoreMatchData;
 use App\Models\Dictionary\GameType;
 use App\Models\GameMatch;
 use App\Models\User;
+use App\Services\Matches\CreateMatchService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -54,6 +56,46 @@ class MatchApiTest extends TestCase
             'game_type_id' => $gameType->id,
             'finished_at' => null,
         ]);
+    }
+
+    public function test_match_creation_passes_a_data_object_to_the_service(): void
+    {
+        $gameType = GameType::query()->firstOrFail();
+        $fakeMatch = GameMatch::factory()->make([
+            'game_type_id' => $gameType->id,
+            'finished_at' => null,
+            'created_at' => now(),
+        ])->setRelation('gameType', $gameType);
+
+        $spy = (object) ['data' => null];
+
+        $this->app->bind(CreateMatchService::class, function () use ($fakeMatch, $spy): CreateMatchService {
+            return new class($fakeMatch, $spy) extends CreateMatchService
+            {
+                public function __construct(
+                    private readonly GameMatch $match,
+                    private readonly object $spy,
+                ) {}
+
+                public function create(StoreMatchData $data): GameMatch
+                {
+                    $this->spy->data = $data;
+
+                    return $this->match;
+                }
+            };
+        });
+
+        $this->postJson('/api/matches', [
+            'game_type_id' => $gameType->id,
+        ], $this->authHeaders())
+            ->assertCreated()
+            ->assertJsonPath('data.id', $fakeMatch->id)
+            ->assertJsonPath('data.game_type_id', $gameType->id);
+
+        $receivedData = $spy->data;
+        $this->assertInstanceOf(StoreMatchData::class, $receivedData);
+        $this->assertSame($gameType->id, $receivedData->gameTypeId);
     }
 
     public function test_match_creation_requires_a_valid_game_type_id(): void

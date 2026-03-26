@@ -14,7 +14,7 @@ class MatchController extends Controller
 {
     public function store(StoreMatchRequest $request, CreateMatchService $createMatchService): JsonResponse
     {
-        $match = $createMatchService->create($request->validated());
+        $match = $createMatchService->create($request->toData());
 
         return MatchResource::make($match)
             ->response()
