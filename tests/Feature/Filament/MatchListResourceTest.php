@@ -84,8 +84,8 @@ class MatchListResourceTest extends TestCase
             ->callAction('finishMatch');
 
         $freshMatch = $match->fresh();
-        $this->assertNotNull($freshMatch?->finished_at);
-        $this->assertSame($expectedDuration, $freshMatch?->duration);
+        $this->assertNotNull($freshMatch->finished_at);
+        $this->assertSame($expectedDuration, $freshMatch->duration);
 
         CarbonImmutable::setTestNow();
     }

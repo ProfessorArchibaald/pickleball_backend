@@ -9,6 +9,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
+use OpenApi\Attributes as OA;
 
 class EditController extends Controller implements HasMiddleware
 {
@@ -20,6 +21,20 @@ class EditController extends Controller implements HasMiddleware
                 : [];
     }
 
+    #[OA\Get(
+        path: '/settings/security',
+        operationId: 'settingsSecurityEdit',
+        summary: 'Display the security settings page.',
+        security: [['laravelSession' => []]],
+        tags: ['Settings Security'],
+        responses: [
+            new OA\Response(response: 200, description: 'Security settings Inertia page returned.'),
+            new OA\Response(
+                response: 302,
+                description: 'Redirect to login or password confirmation when the browser session is missing or password confirmation is required.',
+            ),
+        ],
+    )]
     public function __invoke(TwoFactorAuthenticationRequest $request): Response
     {
         $props = [

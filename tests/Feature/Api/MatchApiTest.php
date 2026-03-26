@@ -72,12 +72,12 @@ class MatchApiTest extends TestCase
         $spy = (object) ['data' => null];
 
         $this->app->bind(CreateMatchService::class, function () use ($fakeMatch, $spy): CreateMatchService {
-            return new class($fakeMatch, $spy) extends CreateMatchService
-            {
+            return new class ($fakeMatch, $spy) extends CreateMatchService {
                 public function __construct(
                     private readonly GameMatch $match,
                     private readonly object $spy,
-                ) {}
+                ) {
+                }
 
                 public function create(StoreMatchData $data): GameMatch
                 {
@@ -134,8 +134,8 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.is_finished', true);
 
         $freshMatch = $match->fresh();
-        $this->assertNotNull($freshMatch?->finished_at);
-        $this->assertSame($expectedDuration, $freshMatch?->duration);
+        $this->assertNotNull($freshMatch->finished_at);
+        $this->assertSame($expectedDuration, $freshMatch->duration);
 
         CarbonImmutable::setTestNow();
     }

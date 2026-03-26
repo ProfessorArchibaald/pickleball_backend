@@ -1,0 +1,731 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Pickleball Backend API",
+        "description": "OpenAPI documentation for the API and settings controllers in the Pickleball backend.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Application root"
+        }
+    ],
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "API Auth"
+                ],
+                "summary": "Log in and issue a Sanctum bearer token.",
+                "operationId": "apiAuthLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiLoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bearer token issued successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "required": [
+                                                "token",
+                                                "token_type",
+                                                "user"
+                                            ],
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "1|abcdefghijklmnopqrstuvwxyz"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserData"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failure or invalid credentials.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "API Auth"
+                ],
+                "summary": "Revoke the current Sanctum token.",
+                "operationId": "apiAuthLogout",
+                "responses": {
+                    "204": {
+                        "description": "Current access token revoked."
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/game-types": {
+            "get": {
+                "tags": [
+                    "API Game Type"
+                ],
+                "summary": "Return the game type dictionary.",
+                "operationId": "apiGameTypesIndex",
+                "responses": {
+                    "200": {
+                        "description": "Game type dictionary returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GameTypeData"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/matches/{match}/finish": {
+            "patch": {
+                "tags": [
+                    "API Match"
+                ],
+                "summary": "Mark a match as finished.",
+                "operationId": "apiMatchesFinish",
+                "parameters": [
+                    {
+                        "name": "match",
+                        "in": "path",
+                        "description": "Match identifier.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Match finished successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MatchData"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/matches": {
+            "post": {
+                "tags": [
+                    "API Match"
+                ],
+                "summary": "Create a new match.",
+                "operationId": "apiMatchesStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiStoreMatchRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Match created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MatchData"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/user": {
+            "get": {
+                "tags": [
+                    "API User"
+                ],
+                "summary": "Return the authenticated API user.",
+                "operationId": "apiAuthCurrentUser",
+                "responses": {
+                    "200": {
+                        "description": "Authenticated user returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserData"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/settings/profile": {
+            "get": {
+                "tags": [
+                    "Settings Profile"
+                ],
+                "summary": "Display the profile settings page.",
+                "operationId": "settingsProfileEdit",
+                "responses": {
+                    "200": {
+                        "description": "Profile settings Inertia page returned."
+                    },
+                    "302": {
+                        "description": "Redirect to login when the browser session is missing."
+                    }
+                },
+                "security": [
+                    {
+                        "laravelSession": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Settings Profile"
+                ],
+                "summary": "Delete the authenticated user account.",
+                "operationId": "settingsProfileDelete",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettingsProfileDeleteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect to the home page on success or back to the profile page when validation fails."
+                    }
+                },
+                "security": [
+                    {
+                        "laravelSession": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Settings Profile"
+                ],
+                "summary": "Update the authenticated user profile.",
+                "operationId": "settingsProfileUpdate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettingsProfileUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect back to the profile page. Validation errors are flashed to the session."
+                    }
+                },
+                "security": [
+                    {
+                        "laravelSession": []
+                    }
+                ]
+            }
+        },
+        "/settings/security": {
+            "get": {
+                "tags": [
+                    "Settings Security"
+                ],
+                "summary": "Display the security settings page.",
+                "operationId": "settingsSecurityEdit",
+                "responses": {
+                    "200": {
+                        "description": "Security settings Inertia page returned."
+                    },
+                    "302": {
+                        "description": "Redirect to login or password confirmation when the browser session is missing or password confirmation is required."
+                    }
+                },
+                "security": [
+                    {
+                        "laravelSession": []
+                    }
+                ]
+            }
+        },
+        "/settings/password": {
+            "put": {
+                "tags": [
+                    "Settings Security"
+                ],
+                "summary": "Update the authenticated user password.",
+                "operationId": "settingsSecurityUpdatePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettingsPasswordUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect back to the security page. Validation errors are flashed to the session."
+                    },
+                    "429": {
+                        "description": "Too many password update attempts.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "laravelSession": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiLoginRequest": {
+                "required": [
+                    "email",
+                    "password",
+                    "device_name"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "player@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    },
+                    "device_name": {
+                        "type": "string",
+                        "example": "iphone-16",
+                        "maxLength": 255
+                    }
+                },
+                "type": "object"
+            },
+            "ApiStoreMatchRequest": {
+                "required": [
+                    "game_type_id"
+                ],
+                "properties": {
+                    "game_type_id": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "SettingsPasswordUpdateRequest": {
+                "required": [
+                    "current_password",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "new-password"
+                    },
+                    "password_confirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "new-password"
+                    }
+                },
+                "type": "object"
+            },
+            "SettingsProfileDeleteRequest": {
+                "required": [
+                    "password"
+                ],
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "SettingsProfileUpdateRequest": {
+                "required": [
+                    "name",
+                    "last_name",
+                    "email"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Test",
+                        "maxLength": 255
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "User",
+                        "maxLength": 255
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "test@example.com",
+                        "maxLength": 255
+                    }
+                },
+                "type": "object"
+            },
+            "GameTypeData": {
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Pickleball"
+                    }
+                },
+                "type": "object"
+            },
+            "MatchData": {
+                "required": [
+                    "id",
+                    "game_type_id",
+                    "game_type",
+                    "created_at",
+                    "finished_at",
+                    "duration",
+                    "is_finished"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "game_type_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "game_type": {
+                        "$ref": "#/components/schemas/GameTypeData"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "example": 465,
+                        "nullable": true
+                    },
+                    "is_finished": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "UserData": {
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "is_blocked"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Test"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "User",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "test@example.com"
+                    },
+                    "is_blocked": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "email_verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MessageResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Unauthenticated."
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctumBearer": {
+                "type": "http",
+                "description": "Use the bearer token issued by the login endpoint.",
+                "bearerFormat": "Bearer",
+                "scheme": "bearer"
+            },
+            "laravelSession": {
+                "type": "apiKey",
+                "description": "Authenticated browser session cookie used by web settings routes.",
+                "name": "laravel_session",
+                "in": "cookie"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "API Auth",
+            "description": "Sanctum authentication endpoints for mobile and API clients."
+        },
+        {
+            "name": "API User",
+            "description": "Authenticated API user endpoints."
+        },
+        {
+            "name": "API Match",
+            "description": "Match lifecycle endpoints."
+        },
+        {
+            "name": "API Game Type",
+            "description": "Game type dictionary endpoints."
+        },
+        {
+            "name": "Settings Profile",
+            "description": "Browser-based profile settings endpoints."
+        },
+        {
+            "name": "Settings Security",
+            "description": "Browser-based security settings endpoints."
+        }
+    ]
+}

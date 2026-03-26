@@ -7,7 +7,16 @@ use App\Models\Dictionary\Game\GameType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'ApiStoreMatchRequest',
+    required: ['game_type_id'],
+    properties: [
+        new OA\Property(property: 'game_type_id', type: 'integer', example: 1),
+    ],
+    type: 'object',
+)]
 class StoreMatchRequest extends FormRequest
 {
     /**
