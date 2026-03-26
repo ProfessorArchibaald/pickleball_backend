@@ -21,7 +21,7 @@ class AuthController extends Controller
         /** @var User|null $user */
         $user = User::query()->where('email', $email)->first();
 
-        if ($user === null || ! Hash::check($request->validated('password'), $user->password)) {
+        if ($user === null || $user->isBlocked() || ! Hash::check($request->validated('password'), $user->password)) {
             throw ValidationException::withMessages([
                 'email' => [trans('auth.failed')],
             ]);

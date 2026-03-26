@@ -27,4 +27,13 @@ class AdminPanelAccessTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_blocked_admin_users_cannot_open_the_filament_dashboard(): void
+    {
+        $adminUser = User::factory()->admin()->blocked()->create();
+
+        $response = $this->actingAs($adminUser)->get(route('filament.admin.pages.dashboard'));
+
+        $response->assertForbidden();
+    }
 }

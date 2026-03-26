@@ -12,7 +12,7 @@ class UserRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach ([UserRole::ADMIN, UserRole::USER] as $roleName) {
+        foreach (UserRole::defaultNames() as $roleName) {
             UserRole::query()->firstOrCreate(['name' => $roleName]);
         }
     }

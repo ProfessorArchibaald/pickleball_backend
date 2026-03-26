@@ -71,6 +71,21 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_blocked_users_can_not_authenticate_using_the_login_screen(): void
+    {
+        $user = User::factory()->blocked()->create();
+
+        $response = $this
+            ->from(route('login'))
+            ->post(route('login.store'), [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
     public function test_users_can_logout()
     {
         $user = User::factory()->create();

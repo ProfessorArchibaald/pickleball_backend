@@ -35,6 +35,7 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'is_blocked' => false,
             'password' => static::$password ??= Hash::make('password'),
             'role_id' => fn () => static::roleId(UserRole::USER),
             'remember_token' => Str::random(10),
@@ -78,5 +79,10 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'role_id' => static::roleId(UserRole::USER),
         ]);
+    }
+
+    public function blocked(): static
+    {
+        return $this->state(['is_blocked' => true]);
     }
 }

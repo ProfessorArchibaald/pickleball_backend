@@ -58,6 +58,21 @@ class AuthApiTest extends TestCase
             ->assertJsonValidationErrors('email');
     }
 
+    public function test_blocked_user_can_not_log_in(): void
+    {
+        $user = User::factory()->blocked()->create();
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'device_name' => 'iphone-16',
+        ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('email');
+    }
+
     public function test_authenticated_user_can_fetch_their_profile(): void
     {
         $user = User::factory()->create();
