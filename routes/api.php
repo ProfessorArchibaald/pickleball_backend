@@ -1,22 +1,25 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\GameTypeController;
-use App\Http\Controllers\Api\MatchController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\GameType\IndexController as GameTypeIndexController;
+use App\Http\Controllers\Api\Match\FinishController;
+use App\Http\Controllers\Api\Match\StoreController;
+use App\Http\Controllers\Api\User\CurrentUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', LoginController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/user', [AuthController::class, 'user']);
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/user', CurrentUserController::class);
+        Route::post('/logout', LogoutController::class);
     });
 });
 
-Route::get('/game-types', [GameTypeController::class, 'index']);
+Route::get('/game-types', GameTypeIndexController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/matches', [MatchController::class, 'store']);
-    Route::patch('/matches/{match}/finish', [MatchController::class, 'finish']);
+    Route::post('/matches', StoreController::class);
+    Route::patch('/matches/{match}/finish', FinishController::class);
 });

@@ -2,7 +2,7 @@
 import { Form, Head } from '@inertiajs/vue3';
 import { ShieldCheck } from 'lucide-vue-next';
 import { onUnmounted, ref } from 'vue';
-import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
+import UpdatePasswordController from '@/actions/App/Http/Controllers/Settings/Security/UpdatePasswordController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
@@ -57,7 +57,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                 />
 
                 <Form
-                    v-bind="SecurityController.update.form()"
+                    v-bind="UpdatePasswordController.form()"
                     :options="{
                         preserveScroll: true,
                     }"

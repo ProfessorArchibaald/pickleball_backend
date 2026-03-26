@@ -1,22 +1,25 @@
 <?php
 
-use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Settings\Profile\DeleteController as DeleteProfileController;
+use App\Http\Controllers\Settings\Profile\EditController as EditProfileController;
+use App\Http\Controllers\Settings\Profile\UpdateController as UpdateProfileController;
+use App\Http\Controllers\Settings\Security\EditController as EditSecurityController;
+use App\Http\Controllers\Settings\Security\UpdatePasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('settings/profile', EditProfileController::class)->name('profile.edit');
+    Route::patch('settings/profile', UpdateProfileController::class)->name('profile.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('settings/profile', DeleteProfileController::class)->name('profile.destroy');
 
-    Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
+    Route::get('settings/security', EditSecurityController::class)->name('security.edit');
 
-    Route::put('settings/password', [SecurityController::class, 'update'])
+    Route::put('settings/password', UpdatePasswordController::class)
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 

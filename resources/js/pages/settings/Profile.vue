@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import UpdateController from '@/actions/App/Http/Controllers/Settings/Profile/UpdateController';
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -47,7 +47,7 @@ const user = computed(() => page.props.auth.user);
                 />
 
                 <Form
-                    v-bind="ProfileController.update.form()"
+                    v-bind="UpdateController.form()"
                     class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >

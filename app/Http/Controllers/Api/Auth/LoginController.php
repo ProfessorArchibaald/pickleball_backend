@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class LoginController extends Controller
 {
-    public function login(LoginRequest $request): JsonResponse
+    public function __invoke(LoginRequest $request): JsonResponse
     {
         $email = Str::lower($request->validated('email'));
 
@@ -40,17 +39,5 @@ class AuthController extends Controller
                 'user' => UserResource::make($user),
             ],
         ]);
-    }
-
-    public function logout(Request $request): JsonResponse
-    {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(status: 204);
-    }
-
-    public function user(Request $request): UserResource
-    {
-        return UserResource::make($request->user());
     }
 }
