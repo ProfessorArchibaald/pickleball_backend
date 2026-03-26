@@ -10,11 +10,13 @@ use OpenApi\Attributes as OA;
 /** @mixin GameMatch */
 #[OA\Schema(
     schema: 'MatchData',
-    required: ['id', 'game_type_id', 'game_type', 'created_at', 'finished_at', 'duration', 'is_finished'],
+    required: ['id', 'game_type_id', 'game_type', 'game_format_id', 'game_format', 'created_at', 'finished_at', 'duration', 'is_finished'],
     properties: [
         new OA\Property(property: 'id', type: 'integer', example: 1),
         new OA\Property(property: 'game_type_id', type: 'integer', example: 1),
         new OA\Property(property: 'game_type', ref: '#/components/schemas/GameTypeData'),
+        new OA\Property(property: 'game_format_id', type: 'integer', example: 2),
+        new OA\Property(property: 'game_format', ref: '#/components/schemas/GameFormatData'),
         new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
         new OA\Property(property: 'finished_at', type: 'string', format: 'date-time', nullable: true),
         new OA\Property(property: 'duration', type: 'integer', example: 465, nullable: true),
@@ -37,6 +39,11 @@ class MatchResource extends JsonResource
             'game_type' => $this->whenLoaded(
                 'gameType',
                 fn (): GameTypeResource => new GameTypeResource($this->gameType),
+            ),
+            'game_format_id' => $this->game_format_id,
+            'game_format' => $this->whenLoaded(
+                'gameFormat',
+                fn (): GameFormatResource => new GameFormatResource($this->gameFormat),
             ),
             'created_at' => $this->created_at->toISOString(),
             'finished_at' => $this->finished_at?->toISOString(),

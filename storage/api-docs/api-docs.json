@@ -533,12 +533,17 @@
             },
             "ApiStoreMatchRequest": {
                 "required": [
-                    "game_type_id"
+                    "game_type_id",
+                    "game_format_id"
                 ],
                 "properties": {
                     "game_type_id": {
                         "type": "integer",
                         "example": 1
+                    },
+                    "game_format_id": {
+                        "type": "integer",
+                        "example": 2
                     }
                 },
                 "type": "object"
@@ -646,6 +651,8 @@
                     "id",
                     "game_type_id",
                     "game_type",
+                    "game_format_id",
+                    "game_format",
                     "created_at",
                     "finished_at",
                     "duration",
@@ -662,6 +669,13 @@
                     },
                     "game_type": {
                         "$ref": "#/components/schemas/GameTypeData"
+                    },
+                    "game_format_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "game_format": {
+                        "$ref": "#/components/schemas/GameFormatData"
                     },
                     "created_at": {
                         "type": "string",

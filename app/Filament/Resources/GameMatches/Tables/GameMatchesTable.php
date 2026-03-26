@@ -19,6 +19,9 @@ class GameMatchesTable
                 TextColumn::make('gameType.name')
                     ->label('Game type')
                     ->sortable(),
+                TextColumn::make('gameFormat.name')
+                    ->label('Game format')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Created at')
                     ->dateTime()

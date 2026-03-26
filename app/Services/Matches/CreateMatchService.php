@@ -11,8 +11,9 @@ class CreateMatchService
     {
         $match = GameMatch::query()->create([
             'game_type_id' => $data->gameTypeId,
+            'game_format_id' => $data->gameFormatId,
         ]);
 
-        return $match->load('gameType');
+        return $match->load(['gameType', 'gameFormat']);
     }
 }

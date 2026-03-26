@@ -13,10 +13,12 @@ class StoreMatchRequestTest extends TestCase
     {
         $request = StoreMatchRequest::create('/api/matches', 'POST', [
             'game_type_id' => 123,
+            'game_format_id' => 2,
         ]);
 
         $validator = Validator::make($request->all(), [
             'game_type_id' => ['required', 'integer'],
+            'game_format_id' => ['required', 'integer'],
         ]);
 
         $this->assertFalse($validator->fails());
@@ -27,5 +29,6 @@ class StoreMatchRequestTest extends TestCase
 
         $this->assertInstanceOf(StoreMatchData::class, $data);
         $this->assertSame(123, $data->gameTypeId);
+        $this->assertSame(2, $data->gameFormatId);
     }
 }

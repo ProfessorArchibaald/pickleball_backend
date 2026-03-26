@@ -10,5 +10,8 @@ class StoreMatchData extends Data
     public function __construct(
         #[MapInputName('game_type_id')]
         public int $gameTypeId,
-    ) {}
+        #[MapInputName('game_format_id')]
+        public int $gameFormatId,
+    ) {
+    }
 }

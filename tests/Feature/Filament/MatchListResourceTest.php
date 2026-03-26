@@ -37,6 +37,7 @@ class MatchListResourceTest extends TestCase
         $response->assertSee('Matches');
         $response->assertSee((string) $match->id);
         $response->assertSee($match->gameType->name);
+        $response->assertSee($match->gameFormat->name);
     }
 
     public function test_admin_can_open_match_edit_page(): void
@@ -51,6 +52,7 @@ class MatchListResourceTest extends TestCase
         $response->assertOk();
         $response->assertSee('Edit');
         $response->assertSee($match->gameType->name);
+        $response->assertSee($match->gameFormat->name);
     }
 
     public function test_matches_list_has_no_create_or_delete_actions(): void
@@ -111,6 +113,7 @@ class MatchListResourceTest extends TestCase
             ->test(ListGameMatches::class)
             ->assertTableColumnExists('id')
             ->assertTableColumnExists('gameType.name')
+            ->assertTableColumnExists('gameFormat.name')
             ->assertTableColumnExists('created_at')
             ->assertTableColumnExists('finished_at')
             ->assertTableColumnExists('duration');

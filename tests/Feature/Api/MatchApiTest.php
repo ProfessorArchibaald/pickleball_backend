@@ -3,6 +3,8 @@
 namespace Tests\Feature\Api;
 
 use App\Data\Matches\StoreMatchData;
+use App\Models\Dictionary\Game\GameFormat;
+use App\Models\Dictionary\Game\GameFormatType;
 use App\Models\Dictionary\Game\GameType;
 use App\Models\GameMatch;
 use App\Models\User;
@@ -27,6 +29,16 @@ class MatchApiTest extends TestCase
         ];
     }
 
+    private function linkGameFormatToGameType(GameType $gameType, int $gameFormatId): GameFormat
+    {
+        GameFormatType::query()->updateOrCreate(
+            ['game_type_id' => $gameType->id],
+            ['game_format_id' => $gameFormatId],
+        );
+
+        return GameFormat::query()->findOrFail($gameFormatId);
+    }
+
     public function test_guest_cannot_create_a_match(): void
     {
         $response = $this->postJson('/api/matches');
@@ -37,9 +49,11 @@ class MatchApiTest extends TestCase
     public function test_match_can_be_created(): void
     {
         $gameType = GameType::query()->firstOrFail();
+        $gameFormat = $this->linkGameFormatToGameType($gameType, 2);
 
         $response = $this->postJson('/api/matches', [
             'game_type_id' => $gameType->id,
+            'game_format_id' => $gameFormat->id,
         ], $this->authHeaders());
 
         $response
@@ -47,6 +61,9 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.game_type_id', $gameType->id)
             ->assertJsonPath('data.game_type.id', $gameType->id)
             ->assertJsonPath('data.game_type.name', $gameType->name)
+            ->assertJsonPath('data.game_format_id', $gameFormat->id)
+            ->assertJsonPath('data.game_format.id', $gameFormat->id)
+            ->assertJsonPath('data.game_format.name', $gameFormat->name)
             ->assertJsonPath('data.finished_at', null)
             ->assertJsonPath('data.duration', null)
             ->assertJsonPath('data.is_finished', false);
@@ -55,6 +72,7 @@ class MatchApiTest extends TestCase
         $this->assertDatabaseHas('matches', [
             'id' => $response->json('data.id'),
             'game_type_id' => $gameType->id,
+            'game_format_id' => $gameFormat->id,
             'finished_at' => null,
             'duration' => null,
         ]);
@@ -63,11 +81,15 @@ class MatchApiTest extends TestCase
     public function test_match_creation_passes_a_data_object_to_the_service(): void
     {
         $gameType = GameType::query()->firstOrFail();
+        $gameFormat = $this->linkGameFormatToGameType($gameType, 1);
         $fakeMatch = GameMatch::factory()->make([
             'game_type_id' => $gameType->id,
+            'game_format_id' => $gameFormat->id,
             'finished_at' => null,
             'created_at' => now(),
-        ])->setRelation('gameType', $gameType);
+        ])
+            ->setRelation('gameType', $gameType)
+            ->setRelation('gameFormat', $gameFormat);
 
         $spy = (object) ['data' => null];
 
@@ -90,14 +112,17 @@ class MatchApiTest extends TestCase
 
         $this->postJson('/api/matches', [
             'game_type_id' => $gameType->id,
+            'game_format_id' => $gameFormat->id,
         ], $this->authHeaders())
             ->assertCreated()
             ->assertJsonPath('data.id', $fakeMatch->id)
-            ->assertJsonPath('data.game_type_id', $gameType->id);
+            ->assertJsonPath('data.game_type_id', $gameType->id)
+            ->assertJsonPath('data.game_format_id', $gameFormat->id);
 
         $receivedData = $spy->data;
         $this->assertInstanceOf(StoreMatchData::class, $receivedData);
         $this->assertSame($gameType->id, $receivedData->gameTypeId);
+        $this->assertSame($gameFormat->id, $receivedData->gameFormatId);
     }
 
     public function test_match_creation_requires_a_valid_game_type_id(): void
@@ -107,6 +132,37 @@ class MatchApiTest extends TestCase
         $response
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['game_type_id']);
+    }
+
+    public function test_match_creation_requires_a_valid_game_format_id(): void
+    {
+        $gameType = GameType::query()->firstOrFail();
+
+        $response = $this->postJson('/api/matches', [
+            'game_type_id' => $gameType->id,
+        ], $this->authHeaders());
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['game_format_id']);
+    }
+
+    public function test_match_creation_requires_a_game_format_available_for_the_selected_game_type(): void
+    {
+        $gameType = GameType::query()->firstOrFail();
+
+        $response = $this->postJson('/api/matches', [
+            'game_type_id' => $gameType->id,
+            'game_format_id' => 3,
+        ], $this->authHeaders());
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['game_format_id'])
+            ->assertJsonPath(
+                'errors.game_format_id.0',
+                'The selected game format is invalid for the provided game type.',
+            );
     }
 
     public function test_match_can_be_finished(): void
@@ -129,6 +185,9 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.game_type_id', $match->game_type_id)
             ->assertJsonPath('data.game_type.id', $match->gameType->id)
             ->assertJsonPath('data.game_type.name', $match->gameType->name)
+            ->assertJsonPath('data.game_format_id', $match->game_format_id)
+            ->assertJsonPath('data.game_format.id', $match->gameFormat->id)
+            ->assertJsonPath('data.game_format.name', $match->gameFormat->name)
             ->assertJsonPath('data.finished_at', $finishedAt->toISOString())
             ->assertJsonPath('data.duration', $expectedDuration)
             ->assertJsonPath('data.is_finished', true);

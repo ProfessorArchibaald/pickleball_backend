@@ -23,6 +23,12 @@ class GameMatchForm
                     ->disabled()
                     ->dehydrated(false)
                     ->preload(),
+                Select::make('game_format_id')
+                    ->label('Game format')
+                    ->relationship('gameFormat', 'name')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->preload(),
                 DateTimePicker::make('created_at')
                     ->label('Created at')
                     ->disabled()

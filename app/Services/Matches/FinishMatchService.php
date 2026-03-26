@@ -17,6 +17,6 @@ class FinishMatchService
             ])->save();
         }
 
-        return $match->fresh(['gameType']);
+        return $match->fresh(['gameType', 'gameFormat']);
     }
 }
