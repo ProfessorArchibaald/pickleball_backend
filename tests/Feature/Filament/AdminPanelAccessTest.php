@@ -29,7 +29,7 @@ class AdminPanelAccessTest extends TestCase
             ->assertOk()
             ->assertSee('Settings')
             ->assertSee('Swagger')
-            ->assertSee(route('l5-swagger.default.api', absolute: false), false);
+            ->assertSee('/api/documentation', false);
     }
 
     public function test_non_admin_users_cannot_open_the_filament_dashboard(): void

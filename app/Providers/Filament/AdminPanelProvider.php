@@ -51,7 +51,9 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Settings')
                     ->icon(Heroicon::OutlinedCodeBracketSquare)
                     ->sort(1000)
-                    ->url(route('l5-swagger.default.api', absolute: false)),
+                    ->url(static fn (): string => url(
+                        (string) config('l5-swagger.documentations.default.routes.api', 'api/documentation'),
+                    )),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
