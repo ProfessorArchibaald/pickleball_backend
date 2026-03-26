@@ -28,6 +28,7 @@ class SwaggerDocumentationTest extends TestCase
             '/api/auth/logout' => ['post'],
             '/api/auth/user' => ['get'],
             '/api/game-types' => ['get'],
+            '/api/game-types/{gameType}/formats' => ['get'],
             '/api/matches' => ['post'],
             '/api/matches/{match}/finish' => ['patch'],
             '/settings/profile' => ['get', 'patch', 'delete'],
@@ -45,6 +46,7 @@ class SwaggerDocumentationTest extends TestCase
 
         $this->assertArrayHasKey('ApiLoginRequest', $documentation['components']['schemas']);
         $this->assertArrayHasKey('UserData', $documentation['components']['schemas']);
+        $this->assertArrayHasKey('GameFormatData', $documentation['components']['schemas']);
         $this->assertArrayHasKey('GameTypeData', $documentation['components']['schemas']);
         $this->assertArrayHasKey('MatchData', $documentation['components']['schemas']);
         $this->assertArrayHasKey('SettingsProfileUpdateRequest', $documentation['components']['schemas']);
@@ -64,6 +66,7 @@ class SwaggerDocumentationTest extends TestCase
         $this->get(route('l5-swagger.default.docs'))
             ->assertOk()
             ->assertJsonPath('paths./api/auth/login.post.operationId', 'apiAuthLogin')
+            ->assertJsonPath('paths./api/game-types/{gameType}/formats.get.operationId', 'apiGameTypesFormatsIndex')
             ->assertJsonPath('paths./settings/password.put.operationId', 'settingsSecurityUpdatePassword');
     }
 }

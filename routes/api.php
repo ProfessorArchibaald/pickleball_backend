@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\GameType\FormatsIndexController;
 use App\Http\Controllers\Api\GameType\IndexController as GameTypeIndexController;
 use App\Http\Controllers\Api\Match\FinishController;
 use App\Http\Controllers\Api\Match\StoreController;
@@ -18,6 +19,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/game-types', GameTypeIndexController::class);
+Route::get('/game-types/{gameType}/formats', FormatsIndexController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/matches', StoreController::class);

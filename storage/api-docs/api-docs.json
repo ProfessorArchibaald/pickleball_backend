@@ -108,6 +108,59 @@
                 ]
             }
         },
+        "/api/game-types/{gameType}/formats": {
+            "get": {
+                "tags": [
+                    "API Game Type"
+                ],
+                "summary": "Return the game formats available for a given game type.",
+                "operationId": "apiGameTypesFormatsIndex",
+                "parameters": [
+                    {
+                        "name": "gameType",
+                        "in": "path",
+                        "description": "Game type identifier.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Available game formats returned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GameFormatData"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Game type was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/game-types": {
             "get": {
                 "tags": [
@@ -550,6 +603,23 @@
                         "format": "email",
                         "example": "test@example.com",
                         "maxLength": 255
+                    }
+                },
+                "type": "object"
+            },
+            "GameFormatData": {
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "2x2"
                     }
                 },
                 "type": "object"
