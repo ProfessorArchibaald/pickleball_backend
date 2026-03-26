@@ -21,13 +21,11 @@ class MatchResource extends JsonResource
             'game_type_id' => $this->game_type_id,
             'game_type' => $this->whenLoaded(
                 'gameType',
-                fn (): array => [
-                    'id' => $this->gameType->id,
-                    'name' => $this->gameType->name,
-                ],
+                fn (): GameTypeResource => new GameTypeResource($this->gameType),
             ),
             'created_at' => $this->created_at->toISOString(),
             'finished_at' => $this->finished_at?->toISOString(),
+            'duration' => $this->duration,
             'is_finished' => $this->finished_at !== null,
         ];
     }

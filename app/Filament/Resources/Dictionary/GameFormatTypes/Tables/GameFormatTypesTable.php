@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\GameMatches\Tables;
+namespace App\Filament\Resources\Dictionary\GameFormatTypes\Tables;
 
-use App\Filament\Resources\GameMatches\GameMatchResource;
-use App\Models\GameMatch;
+use App\Filament\Resources\Dictionary\GameFormatTypes\GameFormatTypeResource;
+use App\Models\Dictionary\Game\GameFormatType;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class GameMatchesTable
+class GameFormatTypesTable
 {
     public static function configure(Table $table): Table
     {
@@ -19,22 +19,22 @@ class GameMatchesTable
                 TextColumn::make('gameType.name')
                     ->label('Game type')
                     ->sortable(),
+                TextColumn::make('gameFormat.name')
+                    ->label('Game format')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Created at')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('finished_at')
-                    ->label('Finished at')
+                TextColumn::make('updated_at')
+                    ->label('Updated at')
                     ->dateTime()
-                    ->sortable(),
-                TextColumn::make('duration')
-                    ->label('Duration (seconds)')
                     ->sortable(),
             ])
             ->filters([])
             ->searchable(false)
             ->paginated(false)
             ->defaultSort('id')
-            ->recordUrl(fn (GameMatch $record): string => GameMatchResource::getUrl('edit', ['record' => $record]));
+            ->recordUrl(fn (GameFormatType $record): string => GameFormatTypeResource::getUrl('edit', ['record' => $record]));
     }
 }

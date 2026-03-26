@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Models\Dictionary;
+namespace App\Models\Dictionary\Game;
 
 use Database\Factories\Dictionary\GameTypeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -21,6 +22,11 @@ class GameType extends Model
     protected $table = 'game_types';
 
     public const string DEFAULT_NAME = 'Pickleball';
+
+    public function gameFormatType(): HasOne
+    {
+        return $this->hasOne(GameFormatType::class);
+    }
 
     protected static function booted(): void
     {

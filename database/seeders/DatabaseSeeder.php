@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Dictionary\GameFormatSeeder;
 use Database\Seeders\Dictionary\GameTypeSeeder;
 use Database\Seeders\Dictionary\UserRoleSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserRoleSeeder::class,
+            GameFormatSeeder::class,
             GameTypeSeeder::class,
         ]);
     }

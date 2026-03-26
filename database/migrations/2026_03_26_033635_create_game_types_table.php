@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Dictionary\Game\GameType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ return new class extends Migration
         $timestamp = now();
 
         DB::table('game_types')->insert([
-            'name' => 'Pickleball',
+            'name' => GameType::DEFAULT_NAME,
             'created_at' => $timestamp,
             'updated_at' => $timestamp,
         ]);

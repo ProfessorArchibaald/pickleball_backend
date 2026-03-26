@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use App\Models\GameMatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,6 +23,7 @@ class GameMatchFactory extends Factory
         return [
             'game_type_id' => fn (): int => GameType::query()->firstOrFail()->getKey(),
             'finished_at' => null,
+            'duration' => null,
         ];
     }
 }

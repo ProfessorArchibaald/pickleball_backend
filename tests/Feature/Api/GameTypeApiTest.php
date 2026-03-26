@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

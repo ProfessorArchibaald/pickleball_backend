@@ -6,7 +6,7 @@ use App\Filament\Resources\Dictionary\GameTypes\Pages\EditGameType;
 use App\Filament\Resources\Dictionary\GameTypes\Pages\ListGameTypes;
 use App\Filament\Resources\Dictionary\GameTypes\Schemas\GameTypeForm;
 use App\Filament\Resources\Dictionary\GameTypes\Tables\GameTypesTable;
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

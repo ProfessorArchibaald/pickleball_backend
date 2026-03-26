@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\Dictionary\GameTypes\Tables;
+namespace App\Filament\Resources\Dictionary\GameFormats\Tables;
 
-use App\Filament\Resources\Dictionary\GameTypes\GameTypeResource;
-use App\Models\Dictionary\Game\GameType;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class GameTypesTable
+class GameFormatsTable
 {
     public static function configure(Table $table): Table
     {
@@ -20,11 +18,10 @@ class GameTypesTable
                     ->label('Name')
                     ->sortable(),
             ])
-            ->filters([
-            ])
+            ->filters([])
             ->searchable(false)
             ->paginated(false)
             ->defaultSort('id')
-            ->recordUrl(fn (GameType $record): string => GameTypeResource::getUrl('edit', ['record' => $record]));
+            ->recordUrl(null);
     }
 }

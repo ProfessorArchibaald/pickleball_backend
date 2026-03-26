@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use App\Data\Matches\StoreMatchData;
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

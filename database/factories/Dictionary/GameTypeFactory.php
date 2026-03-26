@@ -2,7 +2,7 @@
 
 namespace Database\Factories\Dictionary;
 
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

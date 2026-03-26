@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\GameMatches;
 
+use App\Filament\Resources\GameMatches\Pages\EditGameMatch;
 use App\Filament\Resources\GameMatches\Pages\ListGameMatches;
+use App\Filament\Resources\GameMatches\Schemas\GameMatchForm;
 use App\Filament\Resources\GameMatches\Tables\GameMatchesTable;
 use App\Models\GameMatch;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
@@ -22,6 +25,13 @@ class GameMatchResource extends Resource
 
     protected static ?string $pluralModelLabel = 'matches';
 
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function form(Schema $schema): Schema
+    {
+        return GameMatchForm::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return GameMatchesTable::configure($table);
@@ -36,6 +46,7 @@ class GameMatchResource extends Resource
     {
         return [
             'index' => ListGameMatches::route('/'),
+            'edit' => EditGameMatch::route('/{record}/edit'),
         ];
     }
 }

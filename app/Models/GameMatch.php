@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use Database\Factories\GameMatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $game_type_id
  * @property Carbon $created_at
  * @property Carbon|null $finished_at
+ * @property int|null $duration
  * @property GameType $gameType
  */
 #[Guarded([])]
@@ -37,6 +38,7 @@ class GameMatch extends Model
         return [
             'created_at' => 'datetime',
             'finished_at' => 'datetime',
+            'duration' => 'integer',
         ];
     }
 

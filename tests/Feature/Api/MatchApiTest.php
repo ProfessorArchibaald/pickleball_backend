@@ -3,7 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Data\Matches\StoreMatchData;
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use App\Models\GameMatch;
 use App\Models\User;
 use App\Services\Matches\CreateMatchService;
@@ -48,6 +48,7 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.game_type.id', $gameType->id)
             ->assertJsonPath('data.game_type.name', $gameType->name)
             ->assertJsonPath('data.finished_at', null)
+            ->assertJsonPath('data.duration', null)
             ->assertJsonPath('data.is_finished', false);
 
         $this->assertDatabaseCount('matches', 1);
@@ -55,6 +56,7 @@ class MatchApiTest extends TestCase
             'id' => $response->json('data.id'),
             'game_type_id' => $gameType->id,
             'finished_at' => null,
+            'duration' => null,
         ]);
     }
 
@@ -109,7 +111,15 @@ class MatchApiTest extends TestCase
 
     public function test_match_can_be_finished(): void
     {
-        $match = GameMatch::factory()->create();
+        $createdAt = CarbonImmutable::parse('2026-03-24 10:00:00');
+        $finishedAt = CarbonImmutable::parse('2026-03-24 10:07:45');
+        $expectedDuration = (int) $createdAt->diffInSeconds($finishedAt);
+
+        $match = GameMatch::factory()->create([
+            'created_at' => $createdAt,
+        ]);
+
+        CarbonImmutable::setTestNow($finishedAt);
 
         $response = $this->patchJson("/api/matches/{$match->id}/finish", [], $this->authHeaders());
 
@@ -119,9 +129,15 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.game_type_id', $match->game_type_id)
             ->assertJsonPath('data.game_type.id', $match->gameType->id)
             ->assertJsonPath('data.game_type.name', $match->gameType->name)
+            ->assertJsonPath('data.finished_at', $finishedAt->toISOString())
+            ->assertJsonPath('data.duration', $expectedDuration)
             ->assertJsonPath('data.is_finished', true);
 
-        $this->assertNotNull($match->fresh()->finished_at);
+        $freshMatch = $match->fresh();
+        $this->assertNotNull($freshMatch?->finished_at);
+        $this->assertSame($expectedDuration, $freshMatch?->duration);
+
+        CarbonImmutable::setTestNow();
     }
 
     public function test_finishing_an_already_finished_match_keeps_the_original_finished_at(): void
@@ -130,6 +146,7 @@ class MatchApiTest extends TestCase
 
         $match = GameMatch::factory()->create([
             'finished_at' => $finishedAt,
+            'duration' => 300,
         ]);
 
         $response = $this->patchJson("/api/matches/{$match->id}/finish", [], $this->authHeaders());
@@ -137,11 +154,14 @@ class MatchApiTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.is_finished', true)
-            ->assertJsonPath('data.finished_at', $finishedAt->toISOString());
+            ->assertJsonPath('data.finished_at', $finishedAt->toISOString())
+            ->assertJsonPath('data.duration', 300);
 
-        $freshFinishedAt = $match->fresh()?->finished_at;
+        $freshMatch = $match->fresh();
+        $freshFinishedAt = $freshMatch?->finished_at;
         $this->assertNotNull($freshFinishedAt);
         $this->assertTrue($freshFinishedAt->equalTo($finishedAt));
+        $this->assertSame(300, $freshMatch?->duration);
     }
 
     public function test_guest_cannot_finish_a_match(): void

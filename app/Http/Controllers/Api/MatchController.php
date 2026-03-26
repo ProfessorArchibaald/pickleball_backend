@@ -7,6 +7,7 @@ use App\Http\Requests\Api\StoreMatchRequest;
 use App\Http\Resources\MatchResource;
 use App\Models\GameMatch;
 use App\Services\Matches\CreateMatchService;
+use App\Services\Matches\FinishMatchService;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,14 +22,8 @@ class MatchController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function finish(GameMatch $match): JsonResponse
+    public function finish(GameMatch $match, FinishMatchService $finishMatchService): JsonResponse
     {
-        if ($match->finished_at === null) {
-            $match->forceFill([
-                'finished_at' => now(),
-            ])->save();
-        }
-
-        return MatchResource::make($match->fresh(['gameType']))->response();
+        return MatchResource::make($finishMatchService->finish($match))->response();
     }
 }

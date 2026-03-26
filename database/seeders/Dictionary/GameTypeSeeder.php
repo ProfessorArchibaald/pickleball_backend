@@ -2,7 +2,7 @@
 
 namespace Database\Seeders\Dictionary;
 
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use Illuminate\Database\Seeder;
 
 class GameTypeSeeder extends Seeder

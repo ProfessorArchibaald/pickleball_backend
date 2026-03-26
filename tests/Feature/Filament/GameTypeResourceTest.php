@@ -5,7 +5,7 @@ namespace Tests\Feature\Filament;
 use App\Filament\Resources\Dictionary\GameTypes\GameTypeResource;
 use App\Filament\Resources\Dictionary\GameTypes\Pages\EditGameType;
 use App\Filament\Resources\Dictionary\GameTypes\Pages\ListGameTypes;
-use App\Models\Dictionary\GameType;
+use App\Models\Dictionary\Game\GameType;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
