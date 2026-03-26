@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreMatchRequest;
 use App\Http\Resources\MatchResource;
 use App\Models\GameMatch;
+use App\Services\Matches\CreateMatchService;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class MatchController extends Controller
 {
-    public function store(): JsonResponse
+    public function store(StoreMatchRequest $request, CreateMatchService $createMatchService): JsonResponse
     {
-        $match = GameMatch::query()->create();
+        $match = $createMatchService->create($request->validated());
 
         return MatchResource::make($match)
             ->response()
@@ -27,6 +29,6 @@ class MatchController extends Controller
             ])->save();
         }
 
-        return MatchResource::make($match->fresh())->response();
+        return MatchResource::make($match->fresh(['gameType']))->response();
     }
 }

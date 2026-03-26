@@ -7,11 +7,9 @@ use App\Filament\Resources\Dictionary\UserRoles\Pages\EditUserRole;
 use App\Filament\Resources\Dictionary\UserRoles\UserRoleResource;
 use App\Models\Dictionary\UserRole;
 use App\Models\User;
-use Closure;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -130,16 +128,5 @@ class UserRoleResourceTest extends TestCase
             'id' => $role->id,
             'name' => UserRole::USER,
         ]);
-    }
-
-    private function captureValidationException(Closure $callback): ValidationException
-    {
-        try {
-            $callback();
-        } catch (ValidationException $exception) {
-            return $exception;
-        }
-
-        $this->fail('Expected a validation exception to be thrown.');
     }
 }

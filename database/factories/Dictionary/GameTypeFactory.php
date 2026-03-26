@@ -1,17 +1,16 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Dictionary;
 
 use App\Models\Dictionary\GameType;
-use App\Models\GameMatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<GameMatch>
+ * @extends Factory<GameType>
  */
-class GameMatchFactory extends Factory
+class GameTypeFactory extends Factory
 {
-    protected $model = GameMatch::class;
+    protected $model = GameType::class;
 
     /**
      * Define the model's default state.
@@ -21,8 +20,7 @@ class GameMatchFactory extends Factory
     public function definition(): array
     {
         return [
-            'game_type_id' => fn (): int => GameType::query()->firstOrFail()->getKey(),
-            'finished_at' => null,
+            'name' => GameType::DEFAULT_NAME,
         ];
     }
 }

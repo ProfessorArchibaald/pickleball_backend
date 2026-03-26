@@ -18,6 +18,14 @@ class MatchResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'game_type_id' => $this->game_type_id,
+            'game_type' => $this->whenLoaded(
+                'gameType',
+                fn (): array => [
+                    'id' => $this->gameType->id,
+                    'name' => $this->gameType->name,
+                ],
+            ),
             'created_at' => $this->created_at->toISOString(),
             'finished_at' => $this->finished_at?->toISOString(),
             'is_finished' => $this->finished_at !== null,

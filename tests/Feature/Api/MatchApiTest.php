@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Dictionary\GameType;
 use App\Models\GameMatch;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -33,18 +34,35 @@ class MatchApiTest extends TestCase
 
     public function test_match_can_be_created(): void
     {
-        $response = $this->postJson('/api/matches', [], $this->authHeaders());
+        $gameType = GameType::query()->firstOrFail();
+
+        $response = $this->postJson('/api/matches', [
+            'game_type_id' => $gameType->id,
+        ], $this->authHeaders());
 
         $response
             ->assertCreated()
+            ->assertJsonPath('data.game_type_id', $gameType->id)
+            ->assertJsonPath('data.game_type.id', $gameType->id)
+            ->assertJsonPath('data.game_type.name', $gameType->name)
             ->assertJsonPath('data.finished_at', null)
             ->assertJsonPath('data.is_finished', false);
 
         $this->assertDatabaseCount('matches', 1);
         $this->assertDatabaseHas('matches', [
             'id' => $response->json('data.id'),
+            'game_type_id' => $gameType->id,
             'finished_at' => null,
         ]);
+    }
+
+    public function test_match_creation_requires_a_valid_game_type_id(): void
+    {
+        $response = $this->postJson('/api/matches', [], $this->authHeaders());
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['game_type_id']);
     }
 
     public function test_match_can_be_finished(): void
@@ -56,6 +74,9 @@ class MatchApiTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.id', $match->id)
+            ->assertJsonPath('data.game_type_id', $match->game_type_id)
+            ->assertJsonPath('data.game_type.id', $match->gameType->id)
+            ->assertJsonPath('data.game_type.name', $match->gameType->name)
             ->assertJsonPath('data.is_finished', true);
 
         $this->assertNotNull($match->fresh()->finished_at);
