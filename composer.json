@@ -3,7 +3,10 @@
     "name": "laravel/vue-starter-kit",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -17,6 +20,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
+        "larastan/larastan": "^3.9",
         "laravel/boost": "^2.0",
         "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",
@@ -24,7 +28,8 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^12.5.12"
+        "phpunit/phpunit": "^12.5.12",
+        "rector/rector": "^2.3"
     },
     "autoload": {
         "psr-4": {
@@ -93,6 +98,11 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "format": [
+            "./vendor/bin/pint --dirty --preset psr12",
+            "vendor/bin/rector process app tests",
+            "./vendor/bin/phpstan analyse"
         ]
     },
     "extra": {

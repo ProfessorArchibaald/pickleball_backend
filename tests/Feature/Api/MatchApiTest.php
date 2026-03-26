@@ -76,7 +76,9 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.is_finished', true)
             ->assertJsonPath('data.finished_at', $finishedAt->toISOString());
 
-        $this->assertTrue($match->fresh()->finished_at->equalTo($finishedAt));
+        $freshFinishedAt = $match->fresh()?->finished_at;
+        $this->assertNotNull($freshFinishedAt);
+        $this->assertTrue($freshFinishedAt->equalTo($finishedAt));
     }
 
     public function test_guest_cannot_finish_a_match(): void

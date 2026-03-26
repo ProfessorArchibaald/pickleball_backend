@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\GameMatch;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin GameMatch */
 class MatchResource extends JsonResource
 {
     /**
@@ -16,7 +18,7 @@ class MatchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'created_at' => $this->created_at?->toISOString(),
+            'created_at' => $this->created_at->toISOString(),
             'finished_at' => $this->finished_at?->toISOString(),
             'is_finished' => $this->finished_at !== null,
         ];

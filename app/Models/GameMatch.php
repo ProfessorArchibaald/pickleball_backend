@@ -6,7 +6,13 @@ use Database\Factories\GameMatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property Carbon $created_at
+ * @property Carbon|null $finished_at
+ */
 #[Guarded([])]
 class GameMatch extends Model
 {

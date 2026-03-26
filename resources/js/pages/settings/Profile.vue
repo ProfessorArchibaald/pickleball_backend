@@ -43,7 +43,7 @@ const user = computed(() => page.props.auth.user);
                 <Heading
                     variant="small"
                     title="Profile information"
-                    description="Update your name and email address"
+                    description="Update your first name, last name, and email address"
                 />
 
                 <Form
@@ -52,17 +52,31 @@ const user = computed(() => page.props.auth.user);
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >
                     <div class="grid gap-2">
-                        <Label for="name">Name</Label>
+                        <Label for="name">First name</Label>
                         <Input
                             id="name"
                             class="mt-1 block w-full"
                             name="name"
                             :default-value="user.name"
                             required
-                            autocomplete="name"
-                            placeholder="Full name"
+                            autocomplete="given-name"
+                            placeholder="First name"
                         />
                         <InputError class="mt-2" :message="errors.name" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="last_name">Last name</Label>
+                        <Input
+                            id="last_name"
+                            class="mt-1 block w-full"
+                            name="last_name"
+                            :default-value="user.last_name ?? ''"
+                            required
+                            autocomplete="family-name"
+                            placeholder="Last name"
+                        />
+                        <InputError class="mt-2" :message="errors.last_name" />
                     </div>
 
                     <div class="grid gap-2">

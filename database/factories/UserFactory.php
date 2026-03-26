@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Dictionary\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -17,6 +18,11 @@ class UserFactory extends Factory
      */
     protected static ?string $password;
 
+    protected static function roleId(string $name): int
+    {
+        return UserRole::query()->firstOrCreate(['name' => $name])->getKey();
+    }
+
     /**
      * Define the model's default state.
      *
@@ -25,10 +31,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role_id' => fn () => static::roleId(UserRole::USER),
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -55,6 +63,20 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role_id' => static::roleId(UserRole::ADMIN),
+        ]);
+    }
+
+    public function user(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role_id' => static::roleId(UserRole::USER),
         ]);
     }
 }

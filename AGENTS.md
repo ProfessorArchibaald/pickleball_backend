@@ -1,10 +1,18 @@
 <laravel-boost-guidelines>
 === .ai/core rules ===
 
-# PHPStan / Larastan
+# Typed Constants
 
-- If you have modified any PHP files, you must run `vendor/bin/phpstan analyse` after Pint and fix all reported errors before finalising changes.
-- Configuration is in `phpstan.neon` at the project root. The current level is 5.
+- Every new constant must have an explicit type declaration (PHP 8.3+ typed constants).
+
+```php
+// Correct
+public const string ADMIN = 'Admin';
+public const int MAX_RETRIES = 3;
+
+// Incorrect — missing type
+public const ADMIN = 'Admin';
+```
 
 === .ai/custom-guidelines rules ===
 
@@ -79,12 +87,14 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/sanctum (SANCTUM) - v4
 - laravel/wayfinder (WAYFINDER) - v0
 - livewire/livewire (LIVEWIRE) - v4
+- larastan/larastan (LARASTAN) - v3
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pail (PAIL) - v1
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
 - phpunit/phpunit (PHPUNIT) - v12
+- rector/rector (RECTOR) - v2
 - @inertiajs/vue3 (INERTIA_VUE) - v2
 - tailwindcss (TAILWINDCSS) - v4
 - vue (VUE) - v3

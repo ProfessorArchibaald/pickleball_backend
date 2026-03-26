@@ -1,0 +1,30 @@
+<?php
+
+namespace Tests\Feature\Filament;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class AdminPanelAccessTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_admin_users_can_open_the_filament_dashboard(): void
+    {
+        $adminUser = User::factory()->admin()->create();
+
+        $response = $this->actingAs($adminUser)->get(route('filament.admin.pages.dashboard'));
+
+        $response->assertOk();
+    }
+
+    public function test_non_admin_users_cannot_open_the_filament_dashboard(): void
+    {
+        $user = User::factory()->user()->create();
+
+        $response = $this->actingAs($user)->get(route('filament.admin.pages.dashboard'));
+
+        $response->assertForbidden();
+    }
+}
