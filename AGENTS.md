@@ -97,7 +97,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
 - `laravel-best-practices` — Apply this skill whenever writing, reviewing, or refactoring Laravel PHP code. This includes creating or modifying controllers, models, migrations, form requests, policies, jobs, scheduled commands, service classes, and Eloquent queries. Triggers for N+1 and query performance issues, caching strategies, authorization and security patterns, validation, error handling, queue and job configuration, route definitions, and architectural decisions. Also use for Laravel code reviews and refactoring existing Laravel code to follow best practices. Covers any task involving Laravel backend PHP code patterns.
-- `wayfinder-development` — Activates whenever referencing backend routes in frontend components. Use when importing from @/actions or @/routes, calling Laravel routes from TypeScript, or working with Wayfinder route functions.
+- `wayfinder-development` — Use this skill for Laravel Wayfinder which auto-generates typed functions for Laravel controllers and routes. ALWAYS use this skill when frontend code needs to call backend routes or controller actions. Trigger when: connecting any React/Vue/Svelte/Inertia frontend to Laravel controllers, routes, building end-to-end features with both frontend and backend, wiring up forms or links to backend endpoints, fixing route-related TypeScript errors, importing from @/actions or @/routes, or running wayfinder:generate. Use Wayfinder route functions instead of hardcoded URLs. Covers: wayfinder() vite plugin, .url()/.get()/.post()/.form(), query params, route model binding, tree-shaking. Do not use for backend-only task
 - `inertia-vue-development` — Develops Inertia.js v2 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using <Link>, <Form>, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation.
 - `tailwindcss-development` — Always invoke when the user's message includes 'tailwind' in any form. Also invoke for: building responsive grid layouts (multi-column card grids, product grids), flex/grid page structures (dashboards with sidebars, fixed topbars, mobile-toggle navs), styling UI components (cards, tables, navbars, pricing sections, forms, inputs, badges), adding dark mode variants, fixing spacing or typography, and Tailwind v3/v4 work. The core use case: writing or fixing Tailwind utility classes in HTML templates (Blade, JSX, Vue). Skip for backend PHP logic, database queries, API routes, JavaScript with no HTML/CSS component, CSS file audits, build tool configuration, and vanilla CSS.
 - `fortify-development` — ACTIVATE when the user works on authentication in Laravel. This includes login, registration, password reset, email verification, two-factor authentication (2FA/TOTP/QR codes/recovery codes), profile updates, password confirmation, or any auth-related routes and controllers. Activate when the user mentions Fortify, auth, authentication, login, register, signup, forgot password, verify email, 2FA, or references app/Actions/Fortify/, CreateNewUser, UpdateUserProfileInformation, FortifyServiceProvider, config/fortify.php, or auth guards. Fortify is the frontend-agnostic authentication backend for Laravel that registers all auth routes and controllers. Also activate when building SPA or headless authentication, customizing login redirects, overriding response contracts like LoginResponse, or configuring login throttling. Do NOT activate for Laravel Passport (OAuth2 API tokens), Socialite (OAuth social login), or non-auth Laravel features.
@@ -242,13 +242,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 # Laravel Wayfinder
 
-Wayfinder generates TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
-
-- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components.
-- Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
-- Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
-- Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
-- Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
+Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
 
 === pint/core rules ===
 
@@ -281,5 +275,155 @@ Wayfinder generates TypeScript functions for Laravel routes. Import from `@/acti
 
 Vue components must have a single root element.
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
+
+=== filament/filament rules ===
+
+## Filament
+
+- Filament is used by this application. Follow the existing conventions for how and where it is implemented.
+- Filament is a Server-Driven UI (SDUI) framework for Laravel that lets you define user interfaces in PHP using structured configuration objects. Built on Livewire, Alpine.js, and Tailwind CSS.
+- Use the `search-docs` tool for official documentation on Artisan commands, code examples, testing, relationships, and idiomatic practices. If `search-docs` is unavailable, refer to https://filamentphp.com/docs.
+
+### Artisan
+
+- Always use Filament-specific Artisan commands to create files. Find available commands with the `list-artisan-commands` tool, or run `php artisan --help`.
+- Always inspect required options before running a command, and always pass `--no-interaction`.
+
+### Patterns
+
+Always use static `make()` methods to initialize components. Most configuration methods accept a `Closure` for dynamic values.
+
+Use `Get $get` to read other form field values for conditional logic:
+
+<code-snippet name="Conditional form field visibility" lang="php">
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+
+Select::make('type')
+    ->options(CompanyType::class)
+    ->required()
+    ->live(),
+
+TextInput::make('company_name')
+    ->required()
+    ->visible(fn (Get $get): bool => $get('type') === 'business'),
+
+</code-snippet>
+
+Use `state()` with a `Closure` to compute derived column values:
+
+<code-snippet name="Computed table column value" lang="php">
+use Filament\Tables\Columns\TextColumn;
+
+TextColumn::make('full_name')
+    ->state(fn (User $record): string => "{$record->first_name} {$record->last_name}"),
+
+</code-snippet>
+
+Actions encapsulate a button with an optional modal form and logic:
+
+<code-snippet name="Action with modal form" lang="php">
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+
+Action::make('updateEmail')
+    ->schema([
+        TextInput::make('email')
+            ->email()
+            ->required(),
+    ])
+    ->action(fn (array $data, User $record) => $record->update($data))
+
+</code-snippet>
+
+### Testing
+
+Always authenticate before testing panel functionality. Filament uses Livewire, so use `Livewire::test()` or `livewire()` (available when `pestphp/pest-plugin-livewire` is in `composer.json`):
+
+<code-snippet name="Table test" lang="php">
+use function Pest\Livewire\livewire;
+
+livewire(ListUsers::class)
+    ->assertCanSeeTableRecords($users)
+    ->searchTable($users->first()->name)
+    ->assertCanSeeTableRecords($users->take(1))
+    ->assertCanNotSeeTableRecords($users->skip(1));
+
+</code-snippet>
+
+<code-snippet name="Create resource test" lang="php">
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+
+livewire(CreateUser::class)
+    ->fillForm([
+        'name' => 'Test',
+        'email' => 'test@example.com',
+    ])
+    ->call('create')
+    ->assertNotified()
+    ->assertRedirect();
+
+assertDatabaseHas(User::class, [
+    'name' => 'Test',
+    'email' => 'test@example.com',
+]);
+
+</code-snippet>
+
+<code-snippet name="Testing validation" lang="php">
+use function Pest\Livewire\livewire;
+
+livewire(CreateUser::class)
+    ->fillForm([
+        'name' => null,
+        'email' => 'invalid-email',
+    ])
+    ->call('create')
+    ->assertHasFormErrors([
+        'name' => 'required',
+        'email' => 'email',
+    ])
+    ->assertNotNotified();
+
+</code-snippet>
+
+<code-snippet name="Calling actions in pages" lang="php">
+use Filament\Actions\DeleteAction;
+use function Pest\Livewire\livewire;
+
+livewire(EditUser::class, ['record' => $user->id])
+    ->callAction(DeleteAction::class)
+    ->assertNotified()
+    ->assertRedirect();
+
+</code-snippet>
+
+<code-snippet name="Calling actions in tables" lang="php">
+use Filament\Actions\Testing\TestAction;
+use function Pest\Livewire\livewire;
+
+livewire(ListUsers::class)
+    ->callAction(TestAction::make('promote')->table($user), [
+        'role' => 'admin',
+    ])
+    ->assertNotified();
+
+</code-snippet>
+
+### Correct Namespaces
+
+- Form fields (`TextInput`, `Select`, etc.): `Filament\Forms\Components\`
+- Infolist entries (`TextEntry`, `IconEntry`, etc.): `Filament\Infolists\Components\`
+- Layout components (`Grid`, `Section`, `Fieldset`, `Tabs`, `Wizard`, etc.): `Filament\Schemas\Components\`
+- Schema utilities (`Get`, `Set`, etc.): `Filament\Schemas\Components\Utilities\`
+- Actions (`DeleteAction`, `CreateAction`, etc.): `Filament\Actions\`. Never use `Filament\Tables\Actions\`, `Filament\Forms\Actions\`, or any other sub-namespace for actions.
+- Icons: `Filament\Support\Icons\Heroicon` enum (e.g., `Heroicon::PencilSquare`)
+
+### Common Mistakes
+
+- **Never assume public file visibility.** File visibility is `private` by default. Always use `->visibility('public')` when public access is needed.
+- **Never assume full-width layout.** `Grid`, `Section`, and `Fieldset` do not span all columns by default. Explicitly set column spans when needed.
 
 </laravel-boost-guidelines>
