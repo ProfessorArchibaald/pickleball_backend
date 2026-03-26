@@ -24,8 +24,8 @@ class IndexController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            items: new OA\Items(ref: '#/components/schemas/GameTypeData'),
                             type: 'array',
+                            items: new OA\Items(ref: '#/components/schemas/GameTypeData'),
                         ),
                     ],
                     type: 'object',

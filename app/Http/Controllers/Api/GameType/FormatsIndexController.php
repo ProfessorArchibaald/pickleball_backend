@@ -34,8 +34,8 @@ class FormatsIndexController extends Controller
                     properties: [
                         new OA\Property(
                             property: 'data',
-                            items: new OA\Items(ref: '#/components/schemas/GameFormatData'),
                             type: 'array',
+                            items: new OA\Items(ref: '#/components/schemas/GameFormatData'),
                         ),
                     ],
                     type: 'object',
