@@ -4,6 +4,8 @@ namespace App\Services\Matches;
 
 use App\Data\Matches\StoreMatchData;
 use App\Models\GameMatch;
+use App\Models\MatchPlayer;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CreateMatchService
@@ -23,7 +25,8 @@ class CreateMatchService
 
             $teamAssignments = $this->generateRandomTeams(count($participantUserIds));
 
-            $match->matchPlayers()->createMany(
+            /** @var Collection<int, MatchPlayer> $matchPlayers */
+            $matchPlayers = $match->matchPlayers()->createMany(
                 collect($participantUserIds)
                     ->values()
                     ->map(fn (int $userId, int $index): array => [
@@ -33,6 +36,13 @@ class CreateMatchService
                     ])
                     ->all(),
             );
+
+            $match->matchPoints()->create([
+                'serve_player_id' => $matchPlayers->random()->id,
+                'team1_score' => 0,
+                'team2_score' => 0,
+                'win_point_player_id' => null,
+            ]);
 
             return $match;
         });

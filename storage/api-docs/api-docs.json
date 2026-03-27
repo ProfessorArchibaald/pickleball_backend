@@ -193,6 +193,71 @@
                 }
             }
         },
+        "/api/matches/{match}/actual-point": {
+            "get": {
+                "tags": [
+                    "API Match"
+                ],
+                "summary": "Get the latest point of a match.",
+                "operationId": "apiMatchesActualPoint",
+                "parameters": [
+                    {
+                        "name": "match",
+                        "in": "path",
+                        "description": "Match identifier.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Latest match point returned successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MatchPointData"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match or match point was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
         "/api/matches/{match}/finish": {
             "patch": {
                 "tags": [
@@ -296,6 +361,91 @@
                     },
                     "401": {
                         "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
+        "/api/match-points/{matchPoint}": {
+            "patch": {
+                "tags": [
+                    "API Match"
+                ],
+                "summary": "Update the winning player of a match point.",
+                "operationId": "apiMatchPointsUpdate",
+                "parameters": [
+                    {
+                        "name": "matchPoint",
+                        "in": "path",
+                        "description": "Match point identifier.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiUpdateMatchPointRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Match point updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MatchPointData"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Match point was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -611,6 +761,18 @@
                 },
                 "type": "object"
             },
+            "ApiUpdateMatchPointRequest": {
+                "required": [
+                    "win_point_player_id"
+                ],
+                "properties": {
+                    "win_point_player_id": {
+                        "type": "integer",
+                        "example": 12
+                    }
+                },
+                "type": "object"
+            },
             "SettingsPasswordUpdateRequest": {
                 "required": [
                     "current_password",
@@ -727,6 +889,54 @@
                     "name": {
                         "type": "string",
                         "example": "Pickleball"
+                    }
+                },
+                "type": "object"
+            },
+            "MatchPointData": {
+                "required": [
+                    "id",
+                    "match_id",
+                    "serve_player_id",
+                    "team1_score",
+                    "team2_score",
+                    "win_point_player_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "match_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "serve_player_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "team1_score": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "team2_score": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "win_point_player_id": {
+                        "type": "integer",
+                        "example": 13,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"

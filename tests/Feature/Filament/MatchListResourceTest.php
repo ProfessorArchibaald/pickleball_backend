@@ -5,12 +5,13 @@ namespace Tests\Feature\Filament;
 use App\Data\Matches\StoreMatchData;
 use App\Filament\Resources\GameMatches\GameMatchResource;
 use App\Filament\Resources\GameMatches\Pages\CreateGameMatch;
-use App\Filament\Resources\GameMatches\Pages\EditGameMatch;
 use App\Filament\Resources\GameMatches\Pages\ListGameMatches;
+use App\Filament\Resources\GameMatches\Pages\ViewGameMatch;
 use App\Models\Dictionary\Game\GameFormatType;
 use App\Models\Dictionary\Game\GameType;
 use App\Models\GameMatch;
 use App\Models\MatchPlayer;
+use App\Models\MatchPoint;
 use App\Models\User;
 use App\Services\Matches\CreateMatchService;
 use Carbon\CarbonImmutable;
@@ -61,19 +62,43 @@ class MatchListResourceTest extends TestCase
         $response->assertSee('Players');
     }
 
-    public function test_admin_can_open_match_edit_page(): void
+    public function test_admin_can_open_match_view_page(): void
     {
         $adminUser = User::factory()->admin()->create();
-        $match = GameMatch::factory()->create()->load('gameType');
+        $match = GameMatch::factory()->create()->load('gameType', 'gameFormat');
+        $creator = User::factory()->create([
+            'name' => 'Ivan',
+            'last_name' => 'Creator',
+        ]);
+        $player = User::factory()->create([
+            'name' => 'Petr',
+            'last_name' => 'Player',
+        ]);
+
+        MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'user_id' => $creator->id,
+            'team' => 1,
+            'is_creator' => true,
+        ]);
+        MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'user_id' => $player->id,
+            'team' => 2,
+            'is_creator' => false,
+        ]);
 
         $response = $this
             ->actingAs($adminUser)
-            ->get(GameMatchResource::getUrl('edit', ['record' => $match]));
+            ->get(GameMatchResource::getUrl('view', ['record' => $match]));
 
         $response->assertOk();
-        $response->assertSee('Edit');
+        $response->assertSee('Finish Match');
         $response->assertSee($match->gameType->name);
         $response->assertSee($match->gameFormat->name);
+        $response->assertSee('Players');
+        $response->assertSee('Ivan Creator');
+        $response->assertSee('Petr Player');
     }
 
     public function test_admin_can_create_match_from_filament(): void
@@ -122,6 +147,19 @@ class MatchListResourceTest extends TestCase
                 'is_creator' => false,
             ]);
         }
+
+        $this->assertDatabaseCount('match_points', 1);
+
+        $initialMatchPoint = MatchPoint::query()->where('match_id', $match->id)->first();
+
+        $this->assertNotNull($initialMatchPoint);
+        $this->assertSame(0, $initialMatchPoint->team1_score);
+        $this->assertSame(0, $initialMatchPoint->team2_score);
+        $this->assertNull($initialMatchPoint->win_point_player_id);
+        $this->assertContains(
+            $initialMatchPoint->serve_player_id,
+            MatchPlayer::query()->where('match_id', $match->id)->pluck('id')->all(),
+        );
     }
 
     public function test_filament_match_creation_uses_create_match_service(): void
@@ -143,12 +181,12 @@ class MatchListResourceTest extends TestCase
         $spy = (object) ['data' => null];
 
         $this->app->bind(CreateMatchService::class, function () use ($fakeMatch, $spy): CreateMatchService {
-            return new class ($fakeMatch, $spy) extends CreateMatchService {
+            return new class($fakeMatch, $spy) extends CreateMatchService
+            {
                 public function __construct(
                     private readonly GameMatch $match,
                     private readonly object $spy,
-                ) {
-                }
+                ) {}
 
                 public function create(StoreMatchData $data): GameMatch
                 {
@@ -189,7 +227,7 @@ class MatchListResourceTest extends TestCase
             ->assertTableBulkActionDoesNotExist('delete');
     }
 
-    public function test_admin_can_finish_match_from_edit_page(): void
+    public function test_admin_can_finish_match_from_view_page(): void
     {
         $adminUser = User::factory()->admin()->create();
         $createdAt = CarbonImmutable::parse('2026-03-24 10:00:00');
@@ -203,7 +241,7 @@ class MatchListResourceTest extends TestCase
         CarbonImmutable::setTestNow($finishedAt);
 
         Livewire::actingAs($adminUser)
-            ->test(EditGameMatch::class, ['record' => $match->getRouteKey()])
+            ->test(ViewGameMatch::class, ['record' => $match->getRouteKey()])
             ->assertActionExists('finishMatch')
             ->callAction('finishMatch');
 
@@ -223,7 +261,7 @@ class MatchListResourceTest extends TestCase
         ]);
 
         Livewire::actingAs($adminUser)
-            ->test(EditGameMatch::class, ['record' => $match->getRouteKey()])
+            ->test(ViewGameMatch::class, ['record' => $match->getRouteKey()])
             ->assertActionHidden('finishMatch');
     }
 

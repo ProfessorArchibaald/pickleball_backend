@@ -31,7 +31,9 @@ class SwaggerDocumentationTest extends TestCase
             '/api/game-types' => ['get'],
             '/api/game-types/{gameType}/formats' => ['get'],
             '/api/matches' => ['post'],
+            '/api/matches/{match}/actual-point' => ['get'],
             '/api/matches/{match}/finish' => ['patch'],
+            '/api/match-points/{matchPoint}' => ['patch'],
             '/settings/profile' => ['get', 'patch', 'delete'],
             '/settings/security' => ['get'],
             '/settings/password' => ['put'],
@@ -51,6 +53,8 @@ class SwaggerDocumentationTest extends TestCase
         $this->assertArrayHasKey('GameFormatData', $documentation['components']['schemas']);
         $this->assertArrayHasKey('GameTypeData', $documentation['components']['schemas']);
         $this->assertArrayHasKey('MatchData', $documentation['components']['schemas']);
+        $this->assertArrayHasKey('MatchPointData', $documentation['components']['schemas']);
+        $this->assertArrayHasKey('ApiUpdateMatchPointRequest', $documentation['components']['schemas']);
         $this->assertArrayHasKey('SettingsProfileUpdateRequest', $documentation['components']['schemas']);
         $this->assertArrayHasKey('SettingsProfileDeleteRequest', $documentation['components']['schemas']);
         $this->assertArrayHasKey('SettingsPasswordUpdateRequest', $documentation['components']['schemas']);
@@ -69,6 +73,8 @@ class SwaggerDocumentationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('paths./api/auth/login.post.operationId', 'apiAuthLogin')
             ->assertJsonPath('paths./api/players.get.operationId', 'apiPlayersIndex')
+            ->assertJsonPath('paths./api/matches/{match}/actual-point.get.operationId', 'apiMatchesActualPoint')
+            ->assertJsonPath('paths./api/match-points/{matchPoint}.patch.operationId', 'apiMatchPointsUpdate')
             ->assertJsonPath('paths./api/game-types/{gameType}/formats.get.operationId', 'apiGameTypesFormatsIndex')
             ->assertJsonPath('paths./settings/password.put.operationId', 'settingsSecurityUpdatePassword');
     }

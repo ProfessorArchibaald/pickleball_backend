@@ -8,6 +8,7 @@ use App\Models\Dictionary\Game\GameFormatType;
 use App\Models\Dictionary\Game\GameType;
 use App\Models\GameMatch;
 use App\Models\MatchPlayer;
+use App\Models\MatchPoint;
 use App\Models\User;
 use App\Services\Matches\CreateMatchService;
 use Carbon\CarbonImmutable;
@@ -109,6 +110,19 @@ class MatchApiTest extends TestCase
             ]);
         }
 
+        $this->assertDatabaseCount('match_points', 1);
+
+        $initialMatchPoint = MatchPoint::query()->where('match_id', $matchId)->first();
+
+        $this->assertNotNull($initialMatchPoint);
+        $this->assertSame(0, $initialMatchPoint->team1_score);
+        $this->assertSame(0, $initialMatchPoint->team2_score);
+        $this->assertNull($initialMatchPoint->win_point_player_id);
+        $this->assertContains(
+            $initialMatchPoint->serve_player_id,
+            MatchPlayer::query()->where('match_id', $matchId)->pluck('id')->all(),
+        );
+
         $assignedTeams = MatchPlayer::query()
             ->where('match_id', $matchId)
             ->orderBy('id')
@@ -139,12 +153,12 @@ class MatchApiTest extends TestCase
         $spy = (object) ['data' => null];
 
         $this->app->bind(CreateMatchService::class, function () use ($fakeMatch, $spy): CreateMatchService {
-            return new class ($fakeMatch, $spy) extends CreateMatchService {
+            return new class($fakeMatch, $spy) extends CreateMatchService
+            {
                 public function __construct(
                     private readonly GameMatch $match,
                     private readonly object $spy,
-                ) {
-                }
+                ) {}
 
                 public function create(StoreMatchData $data): GameMatch
                 {
@@ -171,6 +185,197 @@ class MatchApiTest extends TestCase
         $this->assertSame($gameFormat->id, $receivedData->gameFormatId);
         $this->assertSame([$player->id], $receivedData->playerUserIds);
         $this->assertSame($creator->id, $receivedData->creatorUserId);
+    }
+
+    public function test_authenticated_user_can_get_actual_match_point(): void
+    {
+        $match = GameMatch::factory()->create();
+        $servePlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+        ]);
+        $winPointPlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+        ]);
+
+        MatchPoint::factory()->create([
+            'match_id' => $match->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 2,
+            'team2_score' => 1,
+            'win_point_player_id' => $winPointPlayer->id,
+        ]);
+
+        $latestMatchPoint = MatchPoint::factory()->create([
+            'match_id' => $match->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 3,
+            'team2_score' => 1,
+            'win_point_player_id' => $servePlayer->id,
+        ]);
+
+        $response = $this->getJson("/api/matches/{$match->id}/actual-point", $this->authHeaders());
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.id', $latestMatchPoint->id)
+            ->assertJsonPath('data.match_id', $match->id)
+            ->assertJsonPath('data.serve_player_id', $servePlayer->id)
+            ->assertJsonPath('data.team1_score', 3)
+            ->assertJsonPath('data.team2_score', 1)
+            ->assertJsonPath('data.win_point_player_id', $servePlayer->id);
+    }
+
+    public function test_guest_cannot_get_actual_match_point(): void
+    {
+        $match = GameMatch::factory()->create();
+
+        $response = $this->getJson("/api/matches/{$match->id}/actual-point");
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_match_point_update_creates_next_point_and_increments_score_when_server_wins_point(): void
+    {
+        $match = GameMatch::factory()->create();
+        $servePlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'team' => 1,
+        ]);
+        $matchPoint = MatchPoint::factory()->create([
+            'match_id' => $match->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 4,
+            'team2_score' => 3,
+            'win_point_player_id' => null,
+        ]);
+
+        $response = $this->patchJson("/api/match-points/{$matchPoint->id}", [
+            'win_point_player_id' => $servePlayer->id,
+            'team1_score' => 99,
+            'team2_score' => 99,
+        ], $this->authHeaders());
+
+        $latestMatchPoint = MatchPoint::query()
+            ->where('match_id', $match->id)
+            ->latest('id')
+            ->firstOrFail();
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.id', $latestMatchPoint->id)
+            ->assertJsonPath('data.win_point_player_id', null)
+            ->assertJsonPath('data.team1_score', 5)
+            ->assertJsonPath('data.team2_score', 3)
+            ->assertJsonPath('data.serve_player_id', $servePlayer->id);
+
+        $this->assertNotSame($matchPoint->id, $latestMatchPoint->id);
+        $this->assertSame(2, MatchPoint::query()->where('match_id', $match->id)->count());
+
+        $this->assertDatabaseHas('match_points', [
+            'id' => $matchPoint->id,
+            'win_point_player_id' => $servePlayer->id,
+            'team1_score' => 5,
+            'team2_score' => 3,
+        ]);
+
+        $this->assertDatabaseHas('match_points', [
+            'id' => $latestMatchPoint->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 5,
+            'team2_score' => 3,
+            'win_point_player_id' => null,
+        ]);
+    }
+
+    public function test_match_point_update_creates_next_point_with_new_server_when_receiver_wins_point(): void
+    {
+        $match = GameMatch::factory()->create();
+        $servePlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'team' => 1,
+        ]);
+        $winnerPlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'team' => 2,
+        ]);
+        $matchPoint = MatchPoint::factory()->create([
+            'match_id' => $match->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 6,
+            'team2_score' => 4,
+            'win_point_player_id' => null,
+        ]);
+
+        $response = $this->patchJson("/api/match-points/{$matchPoint->id}", [
+            'win_point_player_id' => $winnerPlayer->id,
+        ], $this->authHeaders());
+
+        $latestMatchPoint = MatchPoint::query()
+            ->where('match_id', $match->id)
+            ->latest('id')
+            ->firstOrFail();
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.id', $latestMatchPoint->id)
+            ->assertJsonPath('data.serve_player_id', $winnerPlayer->id)
+            ->assertJsonPath('data.team1_score', 6)
+            ->assertJsonPath('data.team2_score', 4)
+            ->assertJsonPath('data.win_point_player_id', null);
+
+        $this->assertNotSame($matchPoint->id, $latestMatchPoint->id);
+        $this->assertSame(2, MatchPoint::query()->where('match_id', $match->id)->count());
+
+        $this->assertDatabaseHas('match_points', [
+            'id' => $matchPoint->id,
+            'serve_player_id' => $servePlayer->id,
+            'team1_score' => 6,
+            'team2_score' => 4,
+            'win_point_player_id' => $winnerPlayer->id,
+        ]);
+
+        $this->assertDatabaseHas('match_points', [
+            'id' => $latestMatchPoint->id,
+            'serve_player_id' => $winnerPlayer->id,
+            'team1_score' => 6,
+            'team2_score' => 4,
+            'win_point_player_id' => null,
+        ]);
+    }
+
+    public function test_match_point_update_requires_winner_player_from_the_same_match(): void
+    {
+        $match = GameMatch::factory()->create();
+        $servePlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+        ]);
+        $matchPoint = MatchPoint::factory()->create([
+            'match_id' => $match->id,
+            'serve_player_id' => $servePlayer->id,
+            'win_point_player_id' => null,
+        ]);
+        $otherMatchPlayer = MatchPlayer::factory()->create();
+
+        $response = $this->patchJson("/api/match-points/{$matchPoint->id}", [
+            'win_point_player_id' => $otherMatchPlayer->id,
+        ], $this->authHeaders());
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['win_point_player_id']);
+    }
+
+    public function test_guest_cannot_update_match_point(): void
+    {
+        $matchPoint = MatchPoint::factory()->create();
+
+        $response = $this->patchJson("/api/match-points/{$matchPoint->id}", [
+            'win_point_player_id' => MatchPlayer::factory()->create([
+                'match_id' => $matchPoint->match_id,
+            ])->id,
+        ]);
+
+        $response->assertUnauthorized();
     }
 
     public function test_match_creation_requires_a_valid_game_type_id(): void

@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\GameMatches;
 
 use App\Filament\Resources\GameMatches\Pages\CreateGameMatch;
-use App\Filament\Resources\GameMatches\Pages\EditGameMatch;
 use App\Filament\Resources\GameMatches\Pages\ListGameMatches;
+use App\Filament\Resources\GameMatches\Pages\ViewGameMatch;
 use App\Filament\Resources\GameMatches\Schemas\GameMatchForm;
 use App\Filament\Resources\GameMatches\Tables\GameMatchesTable;
 use App\Models\GameMatch;
@@ -42,7 +42,7 @@ class GameMatchResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['gameType', 'gameFormat']);
+            ->with(['gameType', 'gameFormat', 'matchPlayers.user']);
     }
 
     public static function getRelations(): array
@@ -55,7 +55,7 @@ class GameMatchResource extends Resource
         return [
             'index' => ListGameMatches::route('/'),
             'create' => CreateGameMatch::route('/create'),
-            'edit' => EditGameMatch::route('/{record}/edit'),
+            'view' => ViewGameMatch::route('/{record}'),
         ];
     }
 }

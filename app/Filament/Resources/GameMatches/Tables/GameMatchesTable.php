@@ -38,6 +38,6 @@ class GameMatchesTable
             ->searchable(false)
             ->paginated(false)
             ->defaultSort('id')
-            ->recordUrl(fn (GameMatch $record): string => GameMatchResource::getUrl('edit', ['record' => $record]));
+            ->recordUrl(fn (GameMatch $record): string => GameMatchResource::getUrl('view', ['record' => $record]));
     }
 }

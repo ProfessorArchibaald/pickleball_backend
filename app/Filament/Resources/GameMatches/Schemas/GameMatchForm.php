@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\GameMatches\Schemas;
 
 use App\Models\Dictionary\Game\GameFormat;
+use App\Models\MatchPlayer;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -37,7 +40,7 @@ class GameMatchForm
                     $set('game_format_id', null);
                     $set('player_user_ids', []);
                 })
-                ->hiddenOn('edit')
+                ->visibleOn('create')
                 ->preload(),
             Select::make('game_format_id')
                 ->label('Game format')
@@ -58,7 +61,7 @@ class GameMatchForm
                 ->afterStateUpdated(function (Set $set): void {
                     $set('player_user_ids', []);
                 })
-                ->hiddenOn('edit')
+                ->visibleOn('create')
                 ->disabled(fn (Get $get): bool => blank($get('game_type_id')))
                 ->preload()
                 ->live(),
@@ -79,7 +82,7 @@ class GameMatchForm
                         ])
                         ->all(),
                 )
-                ->hiddenOn('edit')
+                ->visibleOn('create')
                 ->disabled(fn (Get $get): bool => blank($get('game_format_id')))
                 ->preload(),
         ];
@@ -124,6 +127,31 @@ class GameMatchForm
                 ->numeric()
                 ->disabled()
                 ->dehydrated(false),
+            Section::make('Players')
+                ->schema([
+                    Textarea::make('players_summary')
+                        ->label('Players')
+                        ->formatStateUsing(
+                            fn ($record): string => $record?->matchPlayers
+                                ->sortBy([
+                                    ['team', 'asc'],
+                                    ['is_creator', 'desc'],
+                                    ['id', 'asc'],
+                                ])
+                                ->map(fn (MatchPlayer $matchPlayer): string => sprintf(
+                                    'Team %d: %s%s',
+                                    $matchPlayer->team,
+                                    $matchPlayer->user->fullName(),
+                                    $matchPlayer->is_creator ? ' (creator)' : '',
+                                ))
+                                ->implode(PHP_EOL) ?? '',
+                        )
+                        ->rows(6)
+                        ->disabled()
+                        ->dehydrated(false),
+                ])
+                ->hiddenOn('create')
+                ->columnSpanFull(),
         ];
     }
 }

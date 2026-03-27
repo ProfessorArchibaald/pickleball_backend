@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property GameType $gameType
  * @property GameFormat $gameFormat
  * @property Collection<int, MatchPlayer> $matchPlayers
+ * @property Collection<int, MatchPoint> $matchPoints
  */
 #[Guarded([])]
 class GameMatch extends Model
@@ -61,5 +62,10 @@ class GameMatch extends Model
     public function matchPlayers(): HasMany
     {
         return $this->hasMany(MatchPlayer::class, 'match_id');
+    }
+
+    public function matchPoints(): HasMany
+    {
+        return $this->hasMany(MatchPoint::class, 'match_id');
     }
 }
