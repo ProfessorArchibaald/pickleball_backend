@@ -22,6 +22,10 @@ use OpenApi\Attributes as OA;
     description: 'Authenticated API user endpoints.',
 )]
 #[OA\Tag(
+    name: 'API Player',
+    description: 'Authenticated player directory endpoints.',
+)]
+#[OA\Tag(
     name: 'API Match',
     description: 'Match lifecycle endpoints.',
 )]

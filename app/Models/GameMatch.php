@@ -6,9 +6,11 @@ use App\Models\Dictionary\Game\GameFormat;
 use App\Models\Dictionary\Game\GameType;
 use Database\Factories\GameMatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -20,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $duration
  * @property GameType $gameType
  * @property GameFormat $gameFormat
+ * @property Collection<int, MatchPlayer> $matchPlayers
  */
 #[Guarded([])]
 class GameMatch extends Model
@@ -53,5 +56,10 @@ class GameMatch extends Model
     public function gameFormat(): BelongsTo
     {
         return $this->belongsTo(GameFormat::class);
+    }
+
+    public function matchPlayers(): HasMany
+    {
+        return $this->hasMany(MatchPlayer::class, 'match_id');
     }
 }

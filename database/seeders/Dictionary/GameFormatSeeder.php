@@ -18,6 +18,7 @@ class GameFormatSeeder extends Seeder
                     fn (string $name, int $id): array => [
                         'id' => $id,
                         'name' => $name,
+                        'number_of_players' => GameFormat::NUMBER_OF_PLAYERS[$id],
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ],
@@ -25,7 +26,7 @@ class GameFormatSeeder extends Seeder
                 ->values()
                 ->all(),
             ['id'],
-            ['name', 'updated_at'],
+            ['name', 'number_of_players', 'updated_at'],
         );
     }
 }

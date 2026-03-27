@@ -12,6 +12,9 @@ class StoreMatchData extends Data
         public int $gameTypeId,
         #[MapInputName('game_format_id')]
         public int $gameFormatId,
+        /** @var array<int, int> */
+        public array $playerUserIds,
+        public int $creatorUserId,
     ) {
     }
 }

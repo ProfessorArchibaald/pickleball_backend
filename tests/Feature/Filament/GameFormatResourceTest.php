@@ -3,6 +3,7 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Dictionary\GameFormats\GameFormatResource;
+use App\Filament\Resources\Dictionary\GameFormats\Pages\EditGameFormat;
 use App\Filament\Resources\Dictionary\GameFormats\Pages\ListGameFormats;
 use App\Models\Dictionary\Game\GameFormat;
 use App\Models\User;
@@ -37,6 +38,39 @@ class GameFormatResourceTest extends TestCase
         $response->assertSee('1x2');
     }
 
+    public function test_admin_can_open_game_format_edit_page(): void
+    {
+        $adminUser = User::factory()->admin()->create();
+        $gameFormat = GameFormat::query()->findOrFail(2);
+
+        $response = $this
+            ->actingAs($adminUser)
+            ->get(GameFormatResource::getUrl('edit', ['record' => $gameFormat]));
+
+        $response->assertOk();
+        $response->assertSee('Edit');
+        $response->assertSee($gameFormat->name);
+    }
+
+    public function test_admin_can_edit_game_format_number_of_players(): void
+    {
+        $adminUser = User::factory()->admin()->create();
+        $gameFormat = GameFormat::query()->findOrFail(2);
+
+        Livewire::actingAs($adminUser)
+            ->test(EditGameFormat::class, ['record' => $gameFormat->getRouteKey()])
+            ->fillForm([
+                'number_of_players' => 6,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas(GameFormat::class, [
+            'id' => $gameFormat->id,
+            'number_of_players' => 6,
+        ]);
+    }
+
     public function test_create_action_is_not_available_for_game_formats(): void
     {
         $adminUser = User::factory()->admin()->create();
@@ -65,6 +99,7 @@ class GameFormatResourceTest extends TestCase
         Livewire::actingAs($adminUser)
             ->test(ListGameFormats::class)
             ->assertTableColumnExists('id')
-            ->assertTableColumnExists('name');
+            ->assertTableColumnExists('name')
+            ->assertTableColumnExists('number_of_players');
     }
 }

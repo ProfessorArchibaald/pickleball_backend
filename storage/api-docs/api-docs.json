@@ -322,6 +322,53 @@
                 ]
             }
         },
+        "/api/players": {
+            "get": {
+                "tags": [
+                    "API Player"
+                ],
+                "summary": "Return all existing players except the authenticated user.",
+                "operationId": "apiPlayersIndex",
+                "responses": {
+                    "200": {
+                        "description": "Players returned successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PlayerListItemData"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication is required.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumBearer": []
+                    }
+                ]
+            }
+        },
         "/api/auth/user": {
             "get": {
                 "tags": [
@@ -534,7 +581,8 @@
             "ApiStoreMatchRequest": {
                 "required": [
                     "game_type_id",
-                    "game_format_id"
+                    "game_format_id",
+                    "players"
                 ],
                 "properties": {
                     "game_type_id": {
@@ -544,6 +592,21 @@
                     "game_format_id": {
                         "type": "integer",
                         "example": 2
+                    },
+                    "players": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "user_id"
+                            ],
+                            "properties": {
+                                "user_id": {
+                                    "type": "integer",
+                                    "example": 5
+                                }
+                            },
+                            "type": "object"
+                        }
                     }
                 },
                 "type": "object"
@@ -612,10 +675,28 @@
                 },
                 "type": "object"
             },
+            "PlayerListItemData": {
+                "required": [
+                    "id",
+                    "full_name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "John Player"
+                    }
+                },
+                "type": "object"
+            },
             "GameFormatData": {
                 "required": [
                     "id",
-                    "name"
+                    "name",
+                    "number_of_players"
                 ],
                 "properties": {
                     "id": {
@@ -625,6 +706,10 @@
                     "name": {
                         "type": "string",
                         "example": "2x2"
+                    },
+                    "number_of_players": {
+                        "type": "integer",
+                        "example": 4
                     }
                 },
                 "type": "object"
@@ -794,6 +879,10 @@
         {
             "name": "API User",
             "description": "Authenticated API user endpoints."
+        },
+        {
+            "name": "API Player",
+            "description": "Authenticated player directory endpoints."
         },
         {
             "name": "API Match",

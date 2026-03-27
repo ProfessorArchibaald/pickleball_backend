@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\GameMatches\Pages;
 
 use App\Filament\Resources\GameMatches\GameMatchResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListGameMatches extends ListRecords
@@ -11,6 +12,8 @@ class ListGameMatches extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            CreateAction::make(),
+        ];
     }
 }

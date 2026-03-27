@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GameMatches;
 
+use App\Filament\Resources\GameMatches\Pages\CreateGameMatch;
 use App\Filament\Resources\GameMatches\Pages\EditGameMatch;
 use App\Filament\Resources\GameMatches\Pages\ListGameMatches;
 use App\Filament\Resources\GameMatches\Schemas\GameMatchForm;
@@ -53,6 +54,7 @@ class GameMatchResource extends Resource
     {
         return [
             'index' => ListGameMatches::route('/'),
+            'create' => CreateGameMatch::route('/create'),
             'edit' => EditGameMatch::route('/{record}/edit'),
         ];
     }

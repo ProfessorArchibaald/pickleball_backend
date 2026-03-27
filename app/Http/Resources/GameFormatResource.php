@@ -10,10 +10,11 @@ use OpenApi\Attributes as OA;
 /** @mixin GameFormat */
 #[OA\Schema(
     schema: 'GameFormatData',
-    required: ['id', 'name'],
+    required: ['id', 'name', 'number_of_players'],
     properties: [
         new OA\Property(property: 'id', type: 'integer', example: 2),
         new OA\Property(property: 'name', type: 'string', example: '2x2'),
+        new OA\Property(property: 'number_of_players', type: 'integer', example: 4),
     ],
     type: 'object',
 )]
@@ -24,6 +25,7 @@ class GameFormatResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'number_of_players' => $this->number_of_players,
         ];
     }
 }

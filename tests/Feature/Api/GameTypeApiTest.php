@@ -64,6 +64,7 @@ class GameTypeApiTest extends TestCase
                 [
                     'id' => 2,
                     'name' => '2x2',
+                    'number_of_players' => 4,
                 ],
             ],
         ]);

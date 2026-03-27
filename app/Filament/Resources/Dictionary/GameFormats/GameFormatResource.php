@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Dictionary\GameFormats;
 
+use App\Filament\Resources\Dictionary\GameFormats\Pages\EditGameFormat;
 use App\Filament\Resources\Dictionary\GameFormats\Pages\ListGameFormats;
+use App\Filament\Resources\Dictionary\GameFormats\Schemas\GameFormatForm;
 use App\Filament\Resources\Dictionary\GameFormats\Tables\GameFormatsTable;
 use App\Models\Dictionary\Game\GameFormat;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
@@ -28,6 +31,11 @@ class GameFormatResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function form(Schema $schema): Schema
+    {
+        return GameFormatForm::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return GameFormatsTable::configure($table);
@@ -42,6 +50,7 @@ class GameFormatResource extends Resource
     {
         return [
             'index' => ListGameFormats::route('/'),
+            'edit' => EditGameFormat::route('/{record}/edit'),
         ];
     }
 }
