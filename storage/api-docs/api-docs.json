@@ -893,13 +893,35 @@
                 },
                 "type": "object"
             },
+            "MatchPointTeamData": {
+                "required": [
+                    "user_id",
+                    "player_id",
+                    "team_score"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "player_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "team_score": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
             "MatchPointData": {
                 "required": [
                     "id",
                     "match_id",
                     "serve_player_id",
-                    "team1_score",
-                    "team2_score",
+                    "team_one",
+                    "team_two",
                     "win_point_player_id",
                     "created_at",
                     "updated_at"
@@ -917,13 +939,11 @@
                         "type": "integer",
                         "example": 12
                     },
-                    "team1_score": {
-                        "type": "integer",
-                        "example": 5
+                    "team_one": {
+                        "$ref": "#/components/schemas/MatchPointTeamData"
                     },
-                    "team2_score": {
-                        "type": "integer",
-                        "example": 3
+                    "team_two": {
+                        "$ref": "#/components/schemas/MatchPointTeamData"
                     },
                     "win_point_player_id": {
                         "type": "integer",

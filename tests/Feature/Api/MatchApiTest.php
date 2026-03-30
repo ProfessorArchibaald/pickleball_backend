@@ -192,9 +192,11 @@ class MatchApiTest extends TestCase
         $match = GameMatch::factory()->create();
         $servePlayer = MatchPlayer::factory()->create([
             'match_id' => $match->id,
+            'team' => 1,
         ]);
         $winPointPlayer = MatchPlayer::factory()->create([
             'match_id' => $match->id,
+            'team' => 2,
         ]);
 
         MatchPoint::factory()->create([
@@ -220,8 +222,12 @@ class MatchApiTest extends TestCase
             ->assertJsonPath('data.id', $latestMatchPoint->id)
             ->assertJsonPath('data.match_id', $match->id)
             ->assertJsonPath('data.serve_player_id', $servePlayer->id)
-            ->assertJsonPath('data.team1_score', 3)
-            ->assertJsonPath('data.team2_score', 1)
+            ->assertJsonPath('data.team_one.user_id', $servePlayer->user_id)
+            ->assertJsonPath('data.team_one.player_id', $servePlayer->id)
+            ->assertJsonPath('data.team_one.team_score', 3)
+            ->assertJsonPath('data.team_two.user_id', $winPointPlayer->user_id)
+            ->assertJsonPath('data.team_two.player_id', $winPointPlayer->id)
+            ->assertJsonPath('data.team_two.team_score', 1)
             ->assertJsonPath('data.win_point_player_id', $servePlayer->id);
     }
 
@@ -240,6 +246,10 @@ class MatchApiTest extends TestCase
         $servePlayer = MatchPlayer::factory()->create([
             'match_id' => $match->id,
             'team' => 1,
+        ]);
+        $secondTeamPlayer = MatchPlayer::factory()->create([
+            'match_id' => $match->id,
+            'team' => 2,
         ]);
         $matchPoint = MatchPoint::factory()->create([
             'match_id' => $match->id,
@@ -264,9 +274,13 @@ class MatchApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $latestMatchPoint->id)
             ->assertJsonPath('data.win_point_player_id', null)
-            ->assertJsonPath('data.team1_score', 5)
-            ->assertJsonPath('data.team2_score', 3)
-            ->assertJsonPath('data.serve_player_id', $servePlayer->id);
+            ->assertJsonPath('data.serve_player_id', $servePlayer->id)
+            ->assertJsonPath('data.team_one.user_id', $servePlayer->user_id)
+            ->assertJsonPath('data.team_one.player_id', $servePlayer->id)
+            ->assertJsonPath('data.team_one.team_score', 5)
+            ->assertJsonPath('data.team_two.user_id', $secondTeamPlayer->user_id)
+            ->assertJsonPath('data.team_two.player_id', $secondTeamPlayer->id)
+            ->assertJsonPath('data.team_two.team_score', 3);
 
         $this->assertNotSame($matchPoint->id, $latestMatchPoint->id);
         $this->assertSame(2, MatchPoint::query()->where('match_id', $match->id)->count());
@@ -319,8 +333,12 @@ class MatchApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $latestMatchPoint->id)
             ->assertJsonPath('data.serve_player_id', $winnerPlayer->id)
-            ->assertJsonPath('data.team1_score', 6)
-            ->assertJsonPath('data.team2_score', 4)
+            ->assertJsonPath('data.team_one.user_id', $servePlayer->user_id)
+            ->assertJsonPath('data.team_one.player_id', $servePlayer->id)
+            ->assertJsonPath('data.team_one.team_score', 6)
+            ->assertJsonPath('data.team_two.user_id', $winnerPlayer->user_id)
+            ->assertJsonPath('data.team_two.player_id', $winnerPlayer->id)
+            ->assertJsonPath('data.team_two.team_score', 4)
             ->assertJsonPath('data.win_point_player_id', null);
 
         $this->assertNotSame($matchPoint->id, $latestMatchPoint->id);
